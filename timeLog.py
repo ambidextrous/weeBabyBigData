@@ -27,9 +27,8 @@ def plotData(data):
     fig.autofmt_xdate()
 
     #plt.axvline(dt.datetime(2017,3,17),0.14,0.16, linewidth=4, color='b')
-?!?jedi=0, ?!?                  (start, *_*stop=None*_*, step=1) ?!?jedi?!?
     for i in range(0,len(data)):
-        plt.axvline(dt.datetime(data[i].year,data[i].month,data[i].day),data[i].startTime,data[i].stopTime)
+        plt.axvline(dt.datetime(data[i].year,data[i].month,data[i].day),data[i].startTime,data[i].stopTime, linewidth=4, color = 'b')
     plt.show()
 
 def readDataFromFile(dataFile):
@@ -44,23 +43,29 @@ def readDataFromFile(dataFile):
         f.close()
     return listOfInputLists
 
-class sleepInstance:
+class sleepInstance(object):
     def __init__(self,listOfInputLists):
         self.day = 0
         self.month = 0
         self.year = 0
+        print "listOfInputLists[0] = "+listOfInputLists[0]
         self.formatDate(listOfInputLists[0])
-        self.startTime = this.formatTime(listOfInputLists[1])
-        self.stopTime = this.formatTime(listOfInputLists[2])
+        self.startTime = self.formatTime(listOfInputLists[1])
+        self.stopTime = self.formatTime(listOfInputLists[2])
 
-    def formatDate(unformattedDate):
-        date = strptime(unformattedDate, "%d/%m/%Y")
-        self.day = int("%d")
-        self.month = int("%m")
-        self.year = int("%Y")
+    def formatDate(self,unformattedDate):
+        date = dt.datetime.strptime(unformattedDate,"%d/%m/%y")
+        print "date = "+str(date)
 
-    def formatTime(unformattedTime):
-        timeSinceMidnight = dt.datetime.strptime(unformattedTime,'H%:%M:%S')
+        self.day = int(date.strftime("%d"))
+        self.month = int(date.strftime("%m"))
+        self.year = int(date.strftime("%Y"))
+        print "self.day = "+str(self.day)
+        print "self.month = "+str(self.month)
+        print "self.year  = "+str(self.year)
+
+    def formatTime(self,unformattedTime):
+        timeSinceMidnight = dt.datetime.strptime(unformattedTime,'%H:%M:%S')
         midnight = dt.datetime(1900,1,1)
         minutesSinceMidnight = ((timeSinceMidnight - midnight).total_seconds() / 60.0)
         fractionOfDay = minutesSinceMidnight / MINUTES_IN_DAY
