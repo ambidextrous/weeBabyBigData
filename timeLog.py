@@ -8,9 +8,19 @@ import sys
 MINUTES_IN_DAY = 1440.0
 
 def plotData(data): 
+
+    #fig, ax = plt.subplots()
+    #df.plot(kind='scatter', x='GDP_per_capita', y='life_expectancy', ax=ax)
+
+    # Turn on the grid
+    #ax.grid()
+
+
+
+
     #Make a series of events 1 day apart
     x = mpl.dates.drange(dt.datetime(2017,3,16), 
-                         dt.datetime(2017,3,30), 
+                         dt.datetime(2017,3,25), 
                          dt.timedelta(days=1))
     # Vary the datetimes so that they occur at random times
     # Remember, 1.0 is equivalent to 1 day in this case...
@@ -22,13 +32,18 @@ def plotData(data):
     # I'm just plotting points here, but you could just as easily use a bar.
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    ax.plot_date(x, times, 'ro')
+    ax.plot_date(x, times, 'ro', color='w', visible=False)
+    #ax.plot_date()
     ax.yaxis_date()
     fig.autofmt_xdate()
 
     #plt.axvline(dt.datetime(2017,3,17),0.14,0.16, linewidth=4, color='b')
     for i in range(0,len(data)):
         plt.axvline(dt.datetime(data[i].year,data[i].month,data[i].day),data[i].startTime,data[i].stopTime, linewidth=4, color = 'b')
+
+    ax.legend()
+    ax.grid(True)
+
     plt.show()
 
 def readDataFromFile(dataFile):
