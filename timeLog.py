@@ -19,7 +19,7 @@ def plotData(data):
 
     #Make a series of events 1 day apart
     x = mpl.dates.drange(dt.datetime(2017,3,16), 
-                         dt.datetime(2017,3,25), 
+                         dt.datetime(2017,4,25), 
                          dt.timedelta(days=1))
     # Vary the datetimes so that they occur at random times
     # Remember, 1.0 is equivalent to 1 day in this case...
@@ -65,7 +65,27 @@ def plotData(data):
 
     #plt.axvline(dt.datetime(2017,3,17),0.14,0.16, linewidth=4, color='b')
     for i in range(0,len(data)):
-        plt.axvline(dt.datetime(data[i].year,data[i].month,data[i].day),data[i].startTime,data[i].stopTime, linewidth=4, color = 'b')
+
+        if data[i].startTime > data[i].stopTime:
+            plt.axvline(dt.datetime(data[i].year,data[i].month,data[i].day),data[i].startTime,1, linewidth=1, color = 'b')
+
+
+            nextDay = dt.datetime(data[i].year,data[i].month,data[i].day)
+
+            nextDay += dt.timedelta(days=1)
+
+            plt.axvline(nextDay,0,data[i].stopTime, linewidth=1, color = 'b')
+
+        else:
+            plt.axvline(dt.datetime(data[i].year,data[i].month,data[i].day),data[i].startTime,data[i].stopTime, linewidth=1, color = 'b')
+
+    ax.add_patch(
+        mpl.patches.Rectangle(
+            (736411.0, 0.5), # (x,y)
+            0.5,        # width
+            0.5,        # height
+        )
+    )
 
     ax.set_xlabel('Days',fontweight='bold')
     ax.set_ylabel('Hours',fontweight='bold')
