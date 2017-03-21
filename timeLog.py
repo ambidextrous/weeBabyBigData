@@ -17,32 +17,64 @@ def plotData(data):
 
 
 
-
     #Make a series of events 1 day apart
     x = mpl.dates.drange(dt.datetime(2017,3,16), 
                          dt.datetime(2017,3,25), 
                          dt.timedelta(days=1))
     # Vary the datetimes so that they occur at random times
     # Remember, 1.0 is equivalent to 1 day in this case...
-    x += np.random.random(x.size)
-    
+
+    print "x = "+str(x)
+
+    print "x[0] = "+str(x[0])
+
+    x[0] += 0.85
+
+    print "x[0] = "+str(x[0])
+    print "x = "+str(x)
+    #x += np.random.random(x.size)
+    test = dt.datetime(2017,3,20)
+    print "test = "+str(test)
+
+
+    print "x.size = "+str(x.size)
+    print "x = "+str(x)
+
+
+    # Setting up an invisible background scatterplot give graph the correct size
     # We can extract the time by using a modulo 1, and adding an arbitrary base date
     times = x % 1 + int(x[0]) # (The int is so the y-axis starts at midnight...)
     
     # I'm just plotting points here, but you could just as easily use a bar.
     fig = plt.figure()
+
+    fig.suptitle('Daily Sleep Patterns', fontsize=14, fontweight='bold')
     ax = fig.add_subplot(111)
+
+
     ax.plot_date(x, times, 'ro', color='w', visible=False)
+
     #ax.plot_date()
+
     ax.yaxis_date()
     fig.autofmt_xdate()
+
+    start, end = ax.get_ylim()
+    ax.yaxis.set_ticks(np.arange(start,end, 0.041666666666666))
+    ax.set_yticklabels(['Midnight','1am','2am','3am','4am','5am','6am','7am','8am','9am','10am','11am','Midday','1pm','2pm','3pm','4pm','5pm','6pm','7pm','8pm','9pm','10pm','11pm','Midnight'])
 
     #plt.axvline(dt.datetime(2017,3,17),0.14,0.16, linewidth=4, color='b')
     for i in range(0,len(data)):
         plt.axvline(dt.datetime(data[i].year,data[i].month,data[i].day),data[i].startTime,data[i].stopTime, linewidth=4, color = 'b')
 
+    ax.set_xlabel('Days',fontweight='bold')
+    ax.set_ylabel('Hours',fontweight='bold')
+
     ax.legend()
     ax.grid(True)
+
+
+    #ax.set_ylim([0,1])
 
     plt.show()
 
