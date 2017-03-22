@@ -9,22 +9,16 @@ import sys
 MINUTES_IN_DAY = 1440.0
 COLUMN_COLOUR = 'b'
 
-def plotData(data,columnColour): 
-
-    #fig, ax = plt.subplots()
-    #df.plot(kind='scatter', x='GDP_per_capita', y='life_expectancy', ax=ax)
-
-    # Turn on the grid
-    #ax.grid()
-
-
+def plotData(data,columnColour,maxDate,minDate): 
 
     #Make a series of events 1 day apart
-    x = mpl.dates.drange(dt.datetime(2017,3,16), 
-                         dt.datetime(2017,4,25), 
-                         dt.timedelta(days=1))
+#    x = mpl.dates.drange(dt.datetime(2017,3,16), 
+#                         dt.datetime(2017,4,25), 
+#                         dt.timedelta(days=1))
     # Vary the datetimes so that they occur at random times
     # Remember, 1.0 is equivalent to 1 day in this case...
+
+    x = mpl.dates.drange(minDate,maxDate,dt.timedelta(days=1))
 
     print "x = "+str(x)
 
@@ -47,16 +41,12 @@ def plotData(data,columnColour):
     # We can extract the time by using a modulo 1, and adding an arbitrary base date
     times = x % 1 + int(x[0]) # (The int is so the y-axis starts at midnight...)
     
-    # I'm just plotting points here, but you could just as easily use a bar.
     fig = plt.figure()
 
     fig.suptitle('Daily Sleep Patterns', fontsize=14, fontweight='bold')
     ax = fig.add_subplot(111)
 
-
     ax.plot_date(x, times, 'ro', color='w', visible=False)
-
-    #ax.plot_date()
 
     ax.yaxis_date()
     fig.autofmt_xdate()
@@ -65,13 +55,9 @@ def plotData(data,columnColour):
     ax.yaxis.set_ticks(np.arange(start,end, 0.041666666666666))
     ax.set_yticklabels(['Midnight','1am','2am','3am','4am','5am','6am','7am','8am','9am','10am','11am','Midday','1pm','2pm','3pm','4pm','5pm','6pm','7pm','8pm','9pm','10pm','11pm','Midnight'])
 
-    #plt.axvline(dt.datetime(2017,3,17),0.14,0.16, linewidth=4, color='b')
     for i in range(0,len(data)):
 
         if data[i].startTime > data[i].stopTime:
-
-
-
 
             currentDataItem = data[i]
 
@@ -89,21 +75,10 @@ def plotData(data,columnColour):
 
             plt.axvspan(xmin=tomorrow, xmax=theDayAfterTomorrow, ymin=0, ymax=currentDataItem.stopTime, facecolor=columnColour, alpha=0.5)
 
-            #plt.axvline(dt.datetime(data[i].year,data[i].month,data[i].day),data[i].startTime,1, linewidth=1, color = 'b')
-
-
-            #nextDay = dt.datetime(data[i].year,data[i].month,data[i].day)
-
-            #nextDay += dt.timedelta(days=1)
-
-            #plt.axvline(nextDay,0,data[i].stopTime, linewidth=1, color = 'b')
 
         else:
-            #plt.axvline(dt.datetime(data[i].year,data[i].month,data[i].day),data[i].startTime,data[i].stopTime, linewidth=1, color = 'b')
-
 
             currentDataItem = data[i]
-            
 
             currentDate = dt.datetime(currentDataItem.year,currentDataItem.month,currentDataItem.day)
           
@@ -114,28 +89,13 @@ def plotData(data,columnColour):
 
             plt.axvspan(xmin=currentDate, xmax=tomorrow, ymin=currentDataItem.startTime, ymax=currentDataItem.stopTime, facecolor=columnColour, alpha=0.5)
 
-
-    #plt.axvspan(xmin=736405, xmax=736406, ymin=0.5, ymax=0.75, facecolor='g', alpha=0.5)
-
-    #ax.add_patch(
-    #    mpl.patches.Rectangle(
-    #        (736411.0, 0.5), # (x,y)
-    #        0.5,        # width
-    #        0.5,        # height
-    #    )
-    #)
-
-    #ax.set_xlabel('Days',fontweight='bold')
     ax.set_ylabel('Hours',fontweight='bold')
 
     ax.legend()
     ax.grid(True)
 
-
     rect = patches.Rectangle((736404,1.0),10,5,linewidth=1,edgecolor='r',facecolor='none')
     ax.add_patch(rect)
-
-    #ax.set_ylim([0,1])
 
     plt.show()
 
@@ -185,8 +145,23 @@ def formatDataForPlot(listOfInputLists):
         sleeps.append(sleepInstance(listOfInputLists[i]))
     return sleeps
 
+def getMaxAndMinDates(plotDataList):
+    dateTimeList = []
+    for item in plotDataList:
+        nextDate = dt.datetime(item.year,item.month,item.day)
+        print "nextDate = "+str(nextDate)
+        dateTimeList.append(nextDate)
+    print "dateTimeList = "+str(dateTimeList)
+    maxDate = max(dateTimeList)
+    minDate = min(dateTimeList)
+    print "maxDate = "+str(maxDate)
+    print "minDate = "+str(minDate)
+    return maxDate, minDate
+
 dataFile = 'sleepData.csv'
 listOfInputLists = readDataFromFile(dataFile)
 plotDataList = formatDataForPlot(listOfInputLists)
-plotData(plotDataList,COLUMN_COLOUR)
+maxDate, minDate = getMaxAndMinDates(plotDataList)
+plotData(plotDataList,COLUMN_COLOUR,maxDate,minDate)
+
 
