@@ -9,54 +9,42 @@ import sys
 MINUTES_IN_DAY = 1440.0
 COLUMN_COLOUR = 'b'
 
+# Graph data using matplotlib visualization
 def plotData(data,columnColour,maxDate,minDate): 
 
-    #Make a series of events 1 day apart
-#    x = mpl.dates.drange(dt.datetime(2017,3,16), 
-#                         dt.datetime(2017,4,25), 
-#                         dt.timedelta(days=1))
-    # Vary the datetimes so that they occur at random times
-    # Remember, 1.0 is equivalent to 1 day in this case...
 
+    # Set up an invisible background scatterplot give graph the correct size
+    # Make a series of events that are one day apart 
     x = mpl.dates.drange(minDate,maxDate,dt.timedelta(days=1))
 
-    print "x = "+str(x)
-
-    print "x[0] = "+str(x[0])
-
+    # Offset first event to top of graph to give correct height
     x[0] += 0.85
 
-    print "x[0] = "+str(x[0])
-    print "x = "+str(x)
-    #x += np.random.random(x.size)
-    test = dt.datetime(2017,3,20)
-    print "test = "+str(test)
-
-
-    print "x.size = "+str(x.size)
-    print "x = "+str(x)
-
-
-    # Setting up an invisible background scatterplot give graph the correct size
-    # We can extract the time by using a modulo 1, and adding an arbitrary base date
-    times = x % 1 + int(x[0]) # (The int is so the y-axis starts at midnight...)
+    # Extract the time using a modulo 1, and adding an arbitrary base date
+    # int used so that y-axis starts at midnight
+    times = x % 1 + int(x[0])
     
     fig = plt.figure()
-
     fig.suptitle('Daily Sleep Patterns', fontsize=14, fontweight='bold')
     ax = fig.add_subplot(111)
 
+    # Set background scatterplot to invisible 
     ax.plot_date(x, times, 'ro', color='w', visible=False)
 
     ax.yaxis_date()
     fig.autofmt_xdate()
 
     start, end = ax.get_ylim()
-    ax.yaxis.set_ticks(np.arange(start,end, 0.041666666666666))
+
+    # Fix division sizes and labels to show hours on y-axis
+    hourDivision = 1.0 / 24.0
+    ax.yaxis.set_ticks(np.arange(start,end,hourDivision))
     ax.set_yticklabels(['Midnight','1am','2am','3am','4am','5am','6am','7am','8am','9am','10am','11am','Midday','1pm','2pm','3pm','4pm','5pm','6pm','7pm','8pm','9pm','10pm','11pm','Midnight'])
 
+    # Iterate through data 
     for i in range(0,len(data)):
 
+        # If period starts and finishes on different days, slit and add to both days
         if data[i].startTime > data[i].stopTime:
 
             currentDataItem = data[i]
@@ -75,7 +63,7 @@ def plotData(data,columnColour,maxDate,minDate):
 
             plt.axvspan(xmin=tomorrow, xmax=theDayAfterTomorrow, ymin=0, ymax=currentDataItem.stopTime, facecolor=columnColour, alpha=0.5)
 
-
+        # Else, add to given day
         else:
 
             currentDataItem = data[i]
@@ -91,14 +79,12 @@ def plotData(data,columnColour,maxDate,minDate):
 
     ax.set_ylabel('Hours',fontweight='bold')
 
-    ax.legend()
+    #ax.legend()
     ax.grid(True)
-
-    rect = patches.Rectangle((736404,1.0),10,5,linewidth=1,edgecolor='r',facecolor='none')
-    ax.add_patch(rect)
 
     plt.show()
 
+# Read data from csv file
 def readDataFromFile(dataFile):
     f = open(dataFile,'rt')
     listOfInputLists = []
@@ -106,32 +92,28 @@ def readDataFromFile(dataFile):
         reader = csv.reader(f)
         for row in reader:
             listOfInputLists.append(row)
-            print row
     finally:
         f.close()
     return listOfInputLists
 
+# Class to store time and date data read from file
 class sleepInstance(object):
     def __init__(self,listOfInputLists):
         self.day = 0
         self.month = 0
         self.year = 0
-        print "listOfInputLists[0] = "+listOfInputLists[0]
         self.formatDate(listOfInputLists[0])
         self.startTime = self.formatTime(listOfInputLists[1])
         self.stopTime = self.formatTime(listOfInputLists[2])
 
+    # Extracts date information variables
     def formatDate(self,unformattedDate):
         date = dt.datetime.strptime(unformattedDate,"%d/%m/%y")
-        print "date = "+str(date)
-
         self.day = int(date.strftime("%d"))
         self.month = int(date.strftime("%m"))
         self.year = int(date.strftime("%Y"))
-        print "self.day = "+str(self.day)
-        print "self.month = "+str(self.month)
-        print "self.year  = "+str(self.year)
 
+    # Formats time as a decimal fraction of day, for use in graph
     def formatTime(self,unformattedTime):
         timeSinceMidnight = dt.datetime.strptime(unformattedTime,'%H:%M:%S')
         midnight = dt.datetime(1900,1,1)
@@ -139,23 +121,21 @@ class sleepInstance(object):
         fractionOfDay = minutesSinceMidnight / MINUTES_IN_DAY
         return fractionOfDay
 
+# Formats data read from file as a list of sleepInstance objects
 def formatDataForPlot(listOfInputLists):
     sleeps = []
     for i in range(1,len(listOfInputLists)):
         sleeps.append(sleepInstance(listOfInputLists[i]))
     return sleeps
 
+# Extracts earliest (min) and latest (max) dates from data, for use in setting graph limits
 def getMaxAndMinDates(plotDataList):
     dateTimeList = []
     for item in plotDataList:
         nextDate = dt.datetime(item.year,item.month,item.day)
-        print "nextDate = "+str(nextDate)
         dateTimeList.append(nextDate)
-    print "dateTimeList = "+str(dateTimeList)
     maxDate = max(dateTimeList)
     minDate = min(dateTimeList)
-    print "maxDate = "+str(maxDate)
-    print "minDate = "+str(minDate)
     return maxDate, minDate
 
 dataFile = 'sleepData.csv'
@@ -163,5 +143,4 @@ listOfInputLists = readDataFromFile(dataFile)
 plotDataList = formatDataForPlot(listOfInputLists)
 maxDate, minDate = getMaxAndMinDates(plotDataList)
 plotData(plotDataList,COLUMN_COLOUR,maxDate,minDate)
-
 
