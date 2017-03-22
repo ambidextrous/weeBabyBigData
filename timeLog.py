@@ -11,8 +11,6 @@ COLUMN_COLOUR = 'b'
 
 # Graph data using matplotlib visualization
 def plotData(data,columnColour,maxDate,minDate): 
-
-
     # Set up an invisible background scatterplot give graph the correct size
     # Make a series of events that are one day apart 
     x = mpl.dates.drange(minDate,maxDate,dt.timedelta(days=1))
@@ -30,10 +28,8 @@ def plotData(data,columnColour,maxDate,minDate):
 
     # Set background scatterplot to invisible 
     ax.plot_date(x, times, 'ro', color='w', visible=False)
-
     ax.yaxis_date()
     fig.autofmt_xdate()
-
     start, end = ax.get_ylim()
 
     # Fix division sizes and labels to show hours on y-axis
@@ -46,40 +42,24 @@ def plotData(data,columnColour,maxDate,minDate):
 
         # If period starts and finishes on different days, slit and add to both days
         if data[i].startTime > data[i].stopTime:
-
             currentDataItem = data[i]
-
             currentDate = dt.datetime(currentDataItem.year,currentDataItem.month,currentDataItem.day)
-          
             currentDate -= dt.timedelta(days=0.5)
-
             tomorrow = currentDate + dt.timedelta(days=1)
-            
             plt.axvspan(xmin=currentDate, xmax=tomorrow, ymin=currentDataItem.startTime, ymax=1, facecolor=columnColour, alpha=0.5)
-
-
             theDayAfterTomorrow = tomorrow + dt.timedelta(days=1)
-
-
             plt.axvspan(xmin=tomorrow, xmax=theDayAfterTomorrow, ymin=0, ymax=currentDataItem.stopTime, facecolor=columnColour, alpha=0.5)
 
         # Else, add to given day
         else:
-
             currentDataItem = data[i]
-
             currentDate = dt.datetime(currentDataItem.year,currentDataItem.month,currentDataItem.day)
-          
             currentDate -= dt.timedelta(days=0.5)
-
             tomorrow = currentDate + dt.timedelta(days=1)
-            
-
             plt.axvspan(xmin=currentDate, xmax=tomorrow, ymin=currentDataItem.startTime, ymax=currentDataItem.stopTime, facecolor=columnColour, alpha=0.5)
 
     ax.set_ylabel('Hours',fontweight='bold')
 
-    #ax.legend()
     ax.grid(True)
 
     plt.show()
