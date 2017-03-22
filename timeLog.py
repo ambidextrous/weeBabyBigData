@@ -1,13 +1,15 @@
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
+import matplotlib.patches as patches
 import datetime as dt
 import csv
 import sys
 
 MINUTES_IN_DAY = 1440.0
+COLUMN_COLOUR = 'b'
 
-def plotData(data): 
+def plotData(data,columnColour): 
 
     #fig, ax = plt.subplots()
     #df.plot(kind='scatter', x='GDP_per_capita', y='life_expectancy', ax=ax)
@@ -67,32 +69,71 @@ def plotData(data):
     for i in range(0,len(data)):
 
         if data[i].startTime > data[i].stopTime:
-            plt.axvline(dt.datetime(data[i].year,data[i].month,data[i].day),data[i].startTime,1, linewidth=1, color = 'b')
 
 
-            nextDay = dt.datetime(data[i].year,data[i].month,data[i].day)
 
-            nextDay += dt.timedelta(days=1)
 
-            plt.axvline(nextDay,0,data[i].stopTime, linewidth=1, color = 'b')
+            currentDataItem = data[i]
+
+            currentDate = dt.datetime(currentDataItem.year,currentDataItem.month,currentDataItem.day)
+          
+            currentDate -= dt.timedelta(days=0.5)
+
+            tomorrow = currentDate + dt.timedelta(days=1)
+            
+            plt.axvspan(xmin=currentDate, xmax=tomorrow, ymin=currentDataItem.startTime, ymax=1, facecolor=columnColour, alpha=0.5)
+
+
+            theDayAfterTomorrow = tomorrow + dt.timedelta(days=1)
+
+
+            plt.axvspan(xmin=tomorrow, xmax=theDayAfterTomorrow, ymin=0, ymax=currentDataItem.stopTime, facecolor=columnColour, alpha=0.5)
+
+            #plt.axvline(dt.datetime(data[i].year,data[i].month,data[i].day),data[i].startTime,1, linewidth=1, color = 'b')
+
+
+            #nextDay = dt.datetime(data[i].year,data[i].month,data[i].day)
+
+            #nextDay += dt.timedelta(days=1)
+
+            #plt.axvline(nextDay,0,data[i].stopTime, linewidth=1, color = 'b')
 
         else:
-            plt.axvline(dt.datetime(data[i].year,data[i].month,data[i].day),data[i].startTime,data[i].stopTime, linewidth=1, color = 'b')
+            #plt.axvline(dt.datetime(data[i].year,data[i].month,data[i].day),data[i].startTime,data[i].stopTime, linewidth=1, color = 'b')
 
-    ax.add_patch(
-        mpl.patches.Rectangle(
-            (736411.0, 0.5), # (x,y)
-            0.5,        # width
-            0.5,        # height
-        )
-    )
 
-    ax.set_xlabel('Days',fontweight='bold')
+            currentDataItem = data[i]
+            
+
+            currentDate = dt.datetime(currentDataItem.year,currentDataItem.month,currentDataItem.day)
+          
+            currentDate -= dt.timedelta(days=0.5)
+
+            tomorrow = currentDate + dt.timedelta(days=1)
+            
+
+            plt.axvspan(xmin=currentDate, xmax=tomorrow, ymin=currentDataItem.startTime, ymax=currentDataItem.stopTime, facecolor=columnColour, alpha=0.5)
+
+
+    #plt.axvspan(xmin=736405, xmax=736406, ymin=0.5, ymax=0.75, facecolor='g', alpha=0.5)
+
+    #ax.add_patch(
+    #    mpl.patches.Rectangle(
+    #        (736411.0, 0.5), # (x,y)
+    #        0.5,        # width
+    #        0.5,        # height
+    #    )
+    #)
+
+    #ax.set_xlabel('Days',fontweight='bold')
     ax.set_ylabel('Hours',fontweight='bold')
 
     ax.legend()
     ax.grid(True)
 
+
+    rect = patches.Rectangle((736404,1.0),10,5,linewidth=1,edgecolor='r',facecolor='none')
+    ax.add_patch(rect)
 
     #ax.set_ylim([0,1])
 
@@ -147,5 +188,5 @@ def formatDataForPlot(listOfInputLists):
 dataFile = 'sleepData.csv'
 listOfInputLists = readDataFromFile(dataFile)
 plotDataList = formatDataForPlot(listOfInputLists)
-plotData(plotDataList)
+plotData(plotDataList,COLUMN_COLOUR)
 

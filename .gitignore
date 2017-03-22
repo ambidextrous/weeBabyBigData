@@ -95,3 +95,4 @@ ENV/
 
 # Swap files
 **.swp
+**.csv#
