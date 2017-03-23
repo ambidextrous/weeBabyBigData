@@ -11,6 +11,8 @@ COLUMN_COLOUR = 'b'
 
 # Graph data using matplotlib visualization
 def plotData(data,columnColour,maxDate,minDate): 
+    colourChoices = ['b','r','g','y']
+    activityChoices = ['Sleeping','Feeding']
     # Set up an invisible background scatterplot give graph the correct size
     # Make a series of events that are one day apart 
     x = mpl.dates.drange(minDate,maxDate,dt.timedelta(days=1))
@@ -23,7 +25,7 @@ def plotData(data,columnColour,maxDate,minDate):
     times = x % 1 + int(x[0])
     
     fig = plt.figure()
-    fig.suptitle('Daily Sleep Patterns', fontsize=14, fontweight='bold')
+    fig.suptitle('Daily Activity Patterns', fontsize=14, fontweight='bold')
     ax = fig.add_subplot(111)
 
     # Set background scatterplot to invisible 
@@ -40,15 +42,15 @@ def plotData(data,columnColour,maxDate,minDate):
     # Iterate through data 
     for i in range(0,len(data)):
 
-        # If period starts and finishes on different days, slit and add to both days
+        # If period starts and finishes on different days, split and add to both days
         if data[i].startTime > data[i].stopTime:
             currentDataItem = data[i]
             currentDate = dt.datetime(currentDataItem.year,currentDataItem.month,currentDataItem.day)
             currentDate -= dt.timedelta(days=0.5)
             tomorrow = currentDate + dt.timedelta(days=1)
-            plt.axvspan(xmin=currentDate, xmax=tomorrow, ymin=currentDataItem.startTime, ymax=1, facecolor=columnColour, alpha=0.5)
+            plt.axvspan(xmin=currentDate, xmax=tomorrow, ymin=currentDataItem.startTime, ymax=1, facecolor=colourChoices[data[i].activityIndex], alpha=0.5)
             theDayAfterTomorrow = tomorrow + dt.timedelta(days=1)
-            plt.axvspan(xmin=tomorrow, xmax=theDayAfterTomorrow, ymin=0, ymax=currentDataItem.stopTime, facecolor=columnColour, alpha=0.5)
+            plt.axvspan(xmin=tomorrow, xmax=theDayAfterTomorrow, ymin=0, ymax=currentDataItem.stopTime, facecolor=colourChoices[data[i].activityIndex], alpha=0.5)
 
         # Else, add to given day
         else:
@@ -56,28 +58,40 @@ def plotData(data,columnColour,maxDate,minDate):
             currentDate = dt.datetime(currentDataItem.year,currentDataItem.month,currentDataItem.day)
             currentDate -= dt.timedelta(days=0.5)
             tomorrow = currentDate + dt.timedelta(days=1)
-            plt.axvspan(xmin=currentDate, xmax=tomorrow, ymin=currentDataItem.startTime, ymax=currentDataItem.stopTime, facecolor=columnColour, alpha=0.5)
+            plt.axvspan(xmin=currentDate, xmax=tomorrow, ymin=currentDataItem.startTime, ymax=currentDataItem.stopTime, facecolor=colourChoices[currentDataItem.activityIndex], alpha=0.5)
 
     ax.set_ylabel('Hours',fontweight='bold')
 
     ax.grid(True)
 
+    # Adds legend
+    labels = []
+    for i in range(len(activityChoices)):
+        labels.append(patches.Patch(color=colourChoices[i], label=activityChoices[i], alpha=0.5))
+    plt.legend(handles=labels)
+
+    #red_patch = patches.Patch(color='r', label='Sleeping', alpha=0.5)
+    #blue_patch = patches.Patch(color='b', label='Feeding', alpha=0.5)
+    #plt.legend(handles=[red_patch,blue_patch])
+
     plt.show()
 
 # Read data from csv file
-def readDataFromFile(dataFile):
+def readDataFromFile(dataFile,eventIndex):
     f = open(dataFile,'rt')
     listOfInputLists = []
+
     try:
         reader = csv.reader(f)
         for row in reader:
+            row.append(str(eventIndex))
             listOfInputLists.append(row)
     finally:
         f.close()
     return listOfInputLists
 
 # Class to store time and date data read from file
-class sleepInstance(object):
+class activityInstance(object):
     def __init__(self,listOfInputLists):
         self.day = 0
         self.month = 0
@@ -85,6 +99,7 @@ class sleepInstance(object):
         self.formatDate(listOfInputLists[0])
         self.startTime = self.formatTime(listOfInputLists[1])
         self.stopTime = self.formatTime(listOfInputLists[2])
+        self.activityIndex = int(listOfInputLists[3])
 
     # Extracts date information variables
     def formatDate(self,unformattedDate):
@@ -101,12 +116,13 @@ class sleepInstance(object):
         fractionOfDay = minutesSinceMidnight / MINUTES_IN_DAY
         return fractionOfDay
 
-# Formats data read from file as a list of sleepInstance objects
+# Formats data read from file as a list of eventInstance objects
 def formatDataForPlot(listOfInputLists):
-    sleeps = []
-    for i in range(1,len(listOfInputLists)):
-        sleeps.append(sleepInstance(listOfInputLists[i]))
-    return sleeps
+    activities = []
+    for i in range(len(listOfInputLists)):
+        for j in range(1,len(listOfInputLists[i])):
+            activities.append(activityInstance(listOfInputLists[i][j]))
+    return activities
 
 # Extracts earliest (min) and latest (max) dates from data, for use in setting graph limits
 def getMaxAndMinDates(plotDataList):
@@ -116,11 +132,19 @@ def getMaxAndMinDates(plotDataList):
         dateTimeList.append(nextDate)
     maxDate = max(dateTimeList)
     minDate = min(dateTimeList)
+    # Ensure minimun of three days displayed 
+    if not maxDate > minDate + dt.timedelta(days=1):
+        maxDate = minDate + dt.timedelta(days=2)
     return maxDate, minDate
 
-dataFile = 'sleepData.csv'
-listOfInputLists = readDataFromFile(dataFile)
-plotDataList = formatDataForPlot(listOfInputLists)
-maxDate, minDate = getMaxAndMinDates(plotDataList)
-plotData(plotDataList,COLUMN_COLOUR,maxDate,minDate)
+def go():
+    dataFiles = ['sleepDataStartingMarch22.csv','feedingDataStartingMarch22.csv']
+    listOfInputLists = []
+    for i in range(len(dataFiles)):
+        nextList = readDataFromFile(dataFiles[i],i)
+        listOfInputLists.append(nextList)
+    plotDataList = formatDataForPlot(listOfInputLists)
+    maxDate, minDate = getMaxAndMinDates(plotDataList)
+    plotData(plotDataList,COLUMN_COLOUR,maxDate,minDate)
 
+go()

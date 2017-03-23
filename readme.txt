@@ -9,3 +9,6 @@ The dataset used should be a .csv database with the following form:
 
 Visualisation shows hours of the day on the y-axis and calendar days on the x-axis.
 
+To run:
+
+> python timeLog.py
