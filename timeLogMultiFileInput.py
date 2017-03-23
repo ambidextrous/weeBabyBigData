@@ -12,6 +12,7 @@ COLUMN_COLOUR = 'b'
 # Graph data using matplotlib visualization
 def plotData(data,columnColour,maxDate,minDate): 
     colourChoices = ['b','r','g','y']
+    activityChoices = ['Sleeping','Feeding']
     # Set up an invisible background scatterplot give graph the correct size
     # Make a series of events that are one day apart 
     x = mpl.dates.drange(minDate,maxDate,dt.timedelta(days=1))
@@ -24,7 +25,7 @@ def plotData(data,columnColour,maxDate,minDate):
     times = x % 1 + int(x[0])
     
     fig = plt.figure()
-    fig.suptitle('Daily Sleep Patterns', fontsize=14, fontweight='bold')
+    fig.suptitle('Daily Activity Patterns', fontsize=14, fontweight='bold')
     ax = fig.add_subplot(111)
 
     # Set background scatterplot to invisible 
@@ -41,7 +42,7 @@ def plotData(data,columnColour,maxDate,minDate):
     # Iterate through data 
     for i in range(0,len(data)):
 
-        # If period starts and finishes on different days, slit and add to both days
+        # If period starts and finishes on different days, split and add to both days
         if data[i].startTime > data[i].stopTime:
             currentDataItem = data[i]
             currentDate = dt.datetime(currentDataItem.year,currentDataItem.month,currentDataItem.day)
@@ -63,12 +64,23 @@ def plotData(data,columnColour,maxDate,minDate):
 
     ax.grid(True)
 
+    # Adds legend
+    labels = []
+    for i in range(len(activityChoices)):
+        labels.append(patches.Patch(color=colourChoices[i], label=activityChoices[i], alpha=0.5))
+    plt.legend(handles=labels)
+
+    #red_patch = patches.Patch(color='r', label='Sleeping', alpha=0.5)
+    #blue_patch = patches.Patch(color='b', label='Feeding', alpha=0.5)
+    #plt.legend(handles=[red_patch,blue_patch])
+
     plt.show()
 
 # Read data from csv file
 def readDataFromFile(dataFile,eventIndex):
     f = open(dataFile,'rt')
     listOfInputLists = []
+
     try:
         reader = csv.reader(f)
         for row in reader:
