@@ -5,6 +5,7 @@ import matplotlib.patches as patches
 import datetime as dt
 import csv
 import sys
+from matplotlib.backends.backend_pdf import PdfPages
 
 MINUTES_IN_DAY = 1440.0
 COLUMN_COLOUR = 'b'
@@ -72,10 +73,16 @@ def plotData(data,columnColour,maxDate,minDate):
         labels.append(patches.Patch(color=colourChoices[i], label=activityChoices[i], alpha=0.5))
     plt.legend(handles=labels)
 
-    #red_patch = patches.Patch(color='r', label='Sleeping', alpha=0.5)
-    #blue_patch = patches.Patch(color='b', label='Feeding', alpha=0.5)
-    #plt.legend(handles=[red_patch,blue_patch])
+    # Ensures axis labels not cut off
+    plt.tight_layout()
+    # Ensures suptitle doesn't overlap graph
+    plt.subplots_adjust(top=0.92)
 
+    # Saves to file
+    plt.savefig('activityData.pdf')
+    plt.savefig('activityData.jpg')
+
+    # Shows file onscreen
     plt.show()
 
 # Read data from csv file
