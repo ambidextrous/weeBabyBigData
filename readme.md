@@ -19,5 +19,5 @@ To run from command line:
 
 ## Output
 
-![Output example](https://github.com/ambidextrous/timeLogGrapher/blob/master/activityData.pdf "Ouput Example")
+![Output example](https://github.com/ambidextrous/timeLogGrapher/blob/master/activityData.jpg "Ouput Example")
 
