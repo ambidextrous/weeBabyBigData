@@ -60,7 +60,9 @@ def plotData(data,columnColour,maxDate,minDate):
             tomorrow = currentDate + dt.timedelta(days=1)
             plt.axvspan(xmin=currentDate, xmax=tomorrow, ymin=currentDataItem.startTime, ymax=currentDataItem.stopTime, facecolor=colourChoices[currentDataItem.activityIndex], alpha=0.5)
 
-    ax.set_ylabel('Hours',fontweight='bold')
+    # Labels x and y axes
+    ax.set_ylabel('Hours of day',fontweight='bold')
+    ax.set_xlabel('Days: '+str(minDate.strftime("%A, %d %B %Y"))+' to '+str(maxDate.strftime("%A, %d %B %Y")),fontweight='bold')
 
     ax.grid(True)
 
