@@ -1,4 +1,4 @@
-# Simple Python script to produce a graph of data-set of sleep-time information using the matplotlib library. 
+# Python script to produce a graph of data-set of time spent carrying out daily activities using the matplotlib library. 
 
 ## Use Instructions
 
