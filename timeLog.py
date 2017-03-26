@@ -8,10 +8,9 @@ import sys
 from matplotlib.backends.backend_pdf import PdfPages
 
 MINUTES_IN_DAY = 1440.0
-COLUMN_COLOUR = 'b'
 
 # Graph data using matplotlib visualization
-def plotData(data,columnColour,maxDate,minDate): 
+def plotData(data,maxDate,minDate): 
     colourChoices = ['b','r','g','y']
     activityChoices = ['Sleeping','Feeding']
     # Set up an invisible background scatterplot give graph the correct size
@@ -154,6 +153,6 @@ def go():
         listOfInputLists.append(nextList)
     plotDataList = formatDataForPlot(listOfInputLists)
     maxDate, minDate = getMaxAndMinDates(plotDataList)
-    plotData(plotDataList,COLUMN_COLOUR,maxDate,minDate)
+    plotData(plotDataList,maxDate,minDate)
 
 go()
