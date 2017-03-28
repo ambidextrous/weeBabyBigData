@@ -208,7 +208,7 @@ def go():
         listOfInputLists.append(nextList)
     plotDataList = formatDataForPlot(listOfInputLists)
     maxDate, minDate = getMaxAndMinDates(plotDataList)
-    #plotData(plotDataList,maxDate,minDate)
+    plotData(plotDataList,maxDate,minDate)
 
     formatDataForAnalysis(plotDataList,maxDate,minDate)
 
