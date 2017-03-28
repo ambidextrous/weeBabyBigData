@@ -85,6 +85,11 @@ def plotData(data,maxDate,minDate):
     # Shows file onscreen
     plt.show()
 
+
+def formatDataForAnalysis(plotDataList,maxDate,minDate):
+    pass
+
+
 # Read data from csv file
 def readDataFromFile(dataFile,eventIndex):
     f = open(dataFile,'rt')
