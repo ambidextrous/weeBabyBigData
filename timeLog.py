@@ -87,31 +87,51 @@ def plotData(data,maxDate,minDate):
 
 
 def formatDataForAnalysis(plotDataList,maxDate,minDate):
-    nighttimeBegins = dt.time(23)
-    daytimeBegins = dt.time(07)
-    twentyFourHourPeriods = []
+    
+    dayLengthHours = 24
+    nightStartTimeHours = 23
+    nightDurationHours = 8
+    daytimeStartTimeHours = (nightStartTimeHours + nightDurationHours) % dayLengthHours
 
-    startTimePoint = minDate + daytimeBegins
-    endingPoint = maxDate + daytimeBegins
+    # Creates array of all 24 hour time periods
+    twentyFourHourPeriods = []
+    startingPoint = minDate + dt.timedelta(hours=daytimeStartTimeHours)
+    endingPoint = maxDate + dt.timedelta(hours=daytimeStartTimeHours)
     delta = endingPoint - startingPoint
 
     for i in range(delta.days + 1):
-        day = timePeriod(startingPoint+dt.timedelta(days=i),startingPoint+dt.timedelta(days=i+1))
-        days.append(day)
+        day = timePeriod("24hours",startingPoint+dt.timedelta(days=i),startingPoint+dt.timedelta(days=i+1))
+        twentyFourHourPeriods.append(day)
 
+    # Creates array of all night periods
     nights = []
-    startOfFirstNight = minDate + nighttimeBegins
+    startOfFirstNight = minDate + dt.timedelta(hours=nightStartTimeHours)
     for i in range(delta.days + 1):
-        night = timePeriod(startOfFirstNight+dt.timedelta(days=i,hours=23),startOfFirstNight+dt.timedelta(days=i,hours=31))
+        night = timePeriod("night",startOfFirstNight+dt.timedelta(days=i,hours=nightStartTimeHours),startOfFirstNight+dt.timedelta(days=i,hours=nightStartTimeHours+nightDurationHours))
+        nights.append(night)
 
-    endOfFirstNight = minDate + dt.timedelta(days=1,hours=7)
+    # Adds nights to twentyFourHourPeriods
+    for night in nights:
+        for period in twentyFourHourPeriods:
+            if night.begins >= period.begins and night.begins < period.ends:
+                period.subperiods["night"] = night
 
+    # Test print
+    for period in twentyFourHourPeriods:
+        print period
+        for subperiod in period.subperiods:
+            print period.subperiods["night"]
+        print ""
 
 class timePeriod(object):
-    def __init__(self,begins,ends):
+    def __init__(self,name,begins,ends):
+        self.name = name
         self.begins = begins
         self.ends = ends
         self.activitiesAndTimePercentages = {}
+        self.subperiods = {}
+    def __str__(self):
+        return "timePeriod name:"+str(self.name)+": starts:"+str(self.begins)+"; ends:"+str(self.ends)
 
 class activityInstance(object):
     def __init__(self,startTime,endTime):
@@ -188,6 +208,8 @@ def go():
         listOfInputLists.append(nextList)
     plotDataList = formatDataForPlot(listOfInputLists)
     maxDate, minDate = getMaxAndMinDates(plotDataList)
-    plotData(plotDataList,maxDate,minDate)
+    #plotData(plotDataList,maxDate,minDate)
+
+    formatDataForAnalysis(plotDataList,maxDate,minDate)
 
 go()
