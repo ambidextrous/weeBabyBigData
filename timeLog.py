@@ -87,8 +87,37 @@ def plotData(data,maxDate,minDate):
 
 
 def formatDataForAnalysis(plotDataList,maxDate,minDate):
-    pass
+    nighttimeBegins = dt.time(23)
+    daytimeBegins = dt.time(07)
+    twentyFourHourPeriods = []
 
+    startTimePoint = minDate + daytimeBegins
+    endingPoint = maxDate + daytimeBegins
+    delta = endingPoint - startingPoint
+
+    for i in range(delta.days + 1):
+        day = timePeriod(startingPoint+dt.timedelta(days=i),startingPoint+dt.timedelta(days=i+1))
+        days.append(day)
+
+    nights = []
+    startOfFirstNight = minDate + nighttimeBegins
+    for i in range(delta.days + 1):
+        night = timePeriod(startOfFirstNight+dt.timedelta(days=i,hours=23),startOfFirstNight+dt.timedelta(days=i,hours=31))
+
+    endOfFirstNight = minDate + dt.timedelta(days=1,hours=7)
+
+
+class timePeriod(object):
+    def __init__(self,begins,ends):
+        self.begins = begins
+        self.ends = ends
+        self.activitiesAndTimePercentages = {}
+
+class activityInstance(object):
+    def __init__(self,startTime,endTime):
+        self.name = name
+        self.startTime = startTime
+        self.endTime = endTime
 
 # Read data from csv file
 def readDataFromFile(dataFile,eventIndex):
