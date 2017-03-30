@@ -107,7 +107,7 @@ def formatDataForAnalysis(plotDataList,maxDate,minDate):
     nights = []
     startOfFirstNight = minDate + dt.timedelta(hours=nightStartTimeHours)
     for i in range(delta.days + 1):
-        night = timePeriod("night",startOfFirstNight+dt.timedelta(days=i,hours=nightStartTimeHours),startOfFirstNight+dt.timedelta(days=i,hours=nightStartTimeHours+nightDurationHours))
+        night = timePeriod("night",startOfFirstNight+dt.timedelta(days=i,hours=nightStartTimeHours+1),startOfFirstNight+dt.timedelta(days=i,hours=nightStartTimeHours+1+nightDurationHours))
         nights.append(night)
 
     # Adds nights to twentyFourHourPeriods
@@ -201,7 +201,7 @@ def getMaxAndMinDates(plotDataList):
     return maxDate, minDate
 
 def go():
-    dataFiles = ['sleepDataStartingMarch22.csv','feedingDataStartingMarch22.csv']
+    dataFiles = ['sleepDataStartingMarch22.csv']#,'feedingDataStartingMarch22.csv']
     listOfInputLists = []
     for i in range(len(dataFiles)):
         nextList = readDataFromFile(dataFiles[i],i)
