@@ -105,7 +105,7 @@ def formatDataForAnalysis(plotDataList,maxDate,minDate):
 
     # Creates array of all night periods
     nights = []
-    startOfFirstNight = minDate + dt.timedelta(hours=nightStartTimeHours)
+    startOfFirstNight = minDate + dt.timedelta(hours=nightStartTimeHours) - dt.timedelta(days=1)
     for i in range(delta.days + 1):
         night = timePeriod("night",startOfFirstNight+dt.timedelta(days=i,hours=nightStartTimeHours+1),startOfFirstNight+dt.timedelta(days=i,hours=nightStartTimeHours+1+nightDurationHours))
         nights.append(night)
@@ -115,12 +115,21 @@ def formatDataForAnalysis(plotDataList,maxDate,minDate):
         for period in twentyFourHourPeriods:
             if night.begins >= period.begins and night.begins < period.ends:
                 period.subperiods["night"] = night
+    
+    # Adds days to twentyFourHourPeriods
+    for period in twentyFourHourPeriods:
+        dawn = period.begins
+        dusk = period.subperiods["night"].begins
+        day = timePeriod("day",dawn,dusk)
+        period.subperiods["day"] = day
 
     # Test print
     for period in twentyFourHourPeriods:
         print period
-        for subperiod in period.subperiods:
-            print period.subperiods["night"]
+        #for subperiod in period.subperiods:
+        #    print str(subperiod)
+        print period.subperiods["day"]
+        print period.subperiods["night"]
         print ""
 
 class timePeriod(object):
@@ -130,14 +139,15 @@ class timePeriod(object):
         self.ends = ends
         self.activitiesAndTimePercentages = {}
         self.subperiods = {}
+        self.seconds = (self.ends - self.begins).total_seconds()
     def __str__(self):
-        return "timePeriod name:"+str(self.name)+": starts:"+str(self.begins)+"; ends:"+str(self.ends)
+        return "timePeriod name:"+str(self.name)+": starts:"+str(self.begins)+"; ends:"+str(self.ends)+"; seconds;"+str(self.seconds)
 
-class activityInstance(object):
-    def __init__(self,startTime,endTime):
-        self.name = name
-        self.startTime = startTime
-        self.endTime = endTime
+#class activityInstance(object):
+#    def __init__(self,startTime,endTime):
+#        self.name = name
+#        self.startTime = startTime
+#        self.endTime = endTime
 
 # Read data from csv file
 def readDataFromFile(dataFile,eventIndex):
