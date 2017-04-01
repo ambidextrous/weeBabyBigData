@@ -5,6 +5,7 @@ import matplotlib.patches as patches
 import datetime as dt
 import csv
 import sys
+import time
 from matplotlib.backends.backend_pdf import PdfPages
 
 def formatDataForAnalysis(plotDataList,maxDate,minDate):
@@ -67,20 +68,35 @@ class timePeriod(object):
 
 class activityInstance(object):
     def __init__(self,item):
-        self.startDate = item[0]
-        self.formatDate()
-        self.startTime = item[1]
-        self.endTime = item[2]
+        startDate = item[0]
+        startTime = item[1]
+        endTime = item[2]
         self.name = item[3]
-    # Extracts date information variables
-    def formatDate(self,unformattedDate):
-        date = dt.datetime.strptime(unformattedDate,"%d/%m/%y")
-        self.day = int(date.strftime("%d"))
-        self.month = int(date.strftime("%m"))
-        self.year = int(date.strftime("%Y"))
-        nextDate = dt.datetime(item.year,item.month,item.day)
+        self.start = dt.datetime.strptime(str(startDate)+" "+str(startTime), "%d/%m/%y %H:%M:%S")
+        self.end = dt.datetime.strptime(str(startDate)+" "+str(endTime), "%d/%m/%y %H:%M:%S")
+        if self.end < self.start:
+            self.end += dt.timedelta(days=1)
+        self.seconds = (self.end - self.start).total_seconds()
     def __str__(self):
-        return "activity name:"+self.name+"; startDate:"+self.startDate+"; startTime:"+self.startTime+"; endTime:"+self.endTime
+        return "name:"+str(self.name)+"; start:"+str(self.start)+"; end:"+str(self.end)+"; seconds:"+str(self.seconds)
+
+#        self.startDate = item[0]
+#        self.formatDate(self.startDate)
+#        self.startTime = item[1]
+#        self.endTime = item[2]
+#        self.name = item[3]
+#        self.getStart()
+#        print str(self)
+#    def getStart(self):
+#        self.startDatetime = time.strptime(str(self.startDay)+" "+str(self.startMonth)+" "+str(self.startYear), "%d %m %y")
+#    # Extracts date information variables
+#    def formatDate(self,unformattedDate):
+#        date = dt.datetime.strptime(unformattedDate,"%d/%m/%y")
+#        self.startDay = int(date.strftime("%d"))
+#        self.startMonth = int(date.strftime("%m"))
+#        self.startYear = int(date.strftime("%Y"))
+#    def __str__(self):
+#        return "activity name:"+self.name+"; startDate:"+self.startDate+"; startTime:"+self.startTime+"; endTime:"+self.endTime+"; datetime:"+str(self.startDatetime)
 
 # Read data from csv file
 def readDataFromFile(dataFile,activityName):
@@ -132,17 +148,26 @@ def formatDataForAnalysis(listOfInputLists):
     return activities
 
 # Extracts earliest (min) and latest (max) dates from data, for use in setting graph limits
-def getMaxAndMinDates(plotDataList):
-    dateTimeList = []
-    for item in plotDataList:
-        nextDate = dt.datetime(item.year,item.month,item.day)
-        dateTimeList.append(nextDate)
-    maxDate = max(dateTimeList)
-    minDate = min(dateTimeList)
-    # Ensure minimun of three days displayed 
-    if not maxDate > minDate + dt.timedelta(days=1):
-        maxDate = minDate + dt.timedelta(days=2)
-    return maxDate, minDate
+def getMaxAndMinDates(analysisDataList):
+    earliestDate = analysisDataList[0]
+    latestDate = analysisDataList[0]
+    for item in analysisDataList:
+        if item.start < earliestDate.start:
+            earliestDate = item
+        if item.end > latestDate.end:
+            latestDate = item
+    return latestDate, earliestDate
+        
+#    dateTimeList = []
+#    for item in plotDataList:
+#        nextDate = dt.datetime(item.year,item.month,item.day)
+#        dateTimeList.append(nextDate)
+#    maxDate = max(dateTimeList)
+#    minDate = min(dateTimeList)
+#    # Ensure minimun of three days displayed 
+#    if not maxDate > minDate + dt.timedelta(days=1):
+#        maxDate = minDate + dt.timedelta(days=2)
+#    return maxDate, minDate
 
 def go():
     dataFiles = ['sleepDataStartingMarch22.csv']#,'feedingDataStartingMarch22.csv']
@@ -152,7 +177,7 @@ def go():
         nextList = readDataFromFile(dataFiles[i],activityTypes[i])
         listOfInputLists.append(nextList)
     analysisDataList = formatDataForAnalysis(listOfInputLists)
-    maxDate, minDate = getMaxAndMinDates(plotDataList)
+    maxDate, minDate = getMaxAndMinDates(analysisDataList)
 
     formatDataForAnalysis(analysisDataList,maxDate,minDate)
 
