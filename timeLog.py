@@ -132,6 +132,8 @@ def formatDataForAnalysis(plotDataList,maxDate,minDate):
         print period.subperiods["night"]
         print ""
 
+    
+
 class timePeriod(object):
     def __init__(self,name,begins,ends):
         self.name = name
