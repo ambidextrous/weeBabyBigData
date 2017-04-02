@@ -8,17 +8,17 @@ import sys
 import time
 from matplotlib.backends.backend_pdf import PdfPages
 
-def formatDataForAnalysis(plotDataList,maxDate,minDate):
+def analyseData(plotDataList,maxDate,minDate):
     
     dayLengthHours = 24
     nightStartTimeHours = 23
     nightDurationHours = 8
     daytimeStartTimeHours = (nightStartTimeHours + nightDurationHours) % dayLengthHours
 
-    # Creates array of all 24 hour time periods
+    # Creates array of twentyFourHourPeriods
     twentyFourHourPeriods = []
-    startingPoint = minDate + dt.timedelta(hours=daytimeStartTimeHours)
-    endingPoint = maxDate + dt.timedelta(hours=daytimeStartTimeHours)
+    startingPoint = minDate.begins + dt.timedelta(hours=daytimeStartTimeHours)
+    endingPoint = maxDate.ends + dt.timedelta(hours=daytimeStartTimeHours)
     delta = endingPoint - startingPoint
 
     for i in range(delta.days + 1):
@@ -27,7 +27,7 @@ def formatDataForAnalysis(plotDataList,maxDate,minDate):
 
     # Creates array of all night periods
     nights = []
-    startOfFirstNight = minDate + dt.timedelta(hours=nightStartTimeHours) - dt.timedelta(days=1)
+    startOfFirstNight = minDate.begins + dt.timedelta(hours=nightStartTimeHours) - dt.timedelta(days=1)
     for i in range(delta.days + 1):
         night = timePeriod("night",startOfFirstNight+dt.timedelta(days=i,hours=nightStartTimeHours+1),startOfFirstNight+dt.timedelta(days=i,hours=nightStartTimeHours+1+nightDurationHours))
         nights.append(night)
@@ -54,6 +54,37 @@ def formatDataForAnalysis(plotDataList,maxDate,minDate):
         print period.subperiods["night"]
         print ""
 
+    # Creates a dictionary of dataItem objects, each holding one twentyFourHourPeriod and with that twentyFourHourPeriod's start date as its key
+    dataItems = {}
+    for period in twentyFourHourPeriods:
+        item = dataItem("dataItem",period)
+        dataItems[item.startDate] = item
+
+    print dataItems
+
+
+
+class dataItem(object):
+    def __init__(self,name,twentyFourHourPeriod):
+        self.name = name
+        self.twentyFourHourPeriod = twentyFourHourPeriod
+        startDate = self.twentyFourHourPeriod.begins
+        self.startDate = startDate.strftime("%Y-%m-%d")
+        self.activities = {}
+        self.subperiods = []
+        self.nightSleepPeriods = []
+        self.daySleepPeriods = []
+        self.day = twentyFourHourPeriod.subperiods["day"]
+        self.night = twentyFourHourPeriod.subperiods["night"]
+        self.slept24HoursSeconds = 1.0
+        self.sleptNightSeconds = 1.0
+        self.sleptDaySeconds = 1.0
+        self.avgNightSleepSeconds = 1.0
+        self.avgDaySleepSeconds = 1.0
+        self.goodNightsSleepScore = 1.0
+        print (self)
+    def __str__(self):
+        return "name:"+str(self.name)+"; startDate:"+str(self.startDate)+"; activities:"+str(self.activities)+"; subperiods"+str(self.subperiods)+"; day:"+str(self.day)+"; night:"+str(self.night)+"; slept24HoursSeconds:"+str(self.slept24HoursSeconds)+"; sleptNightSeconds:"+str(self.sleptNightSeconds)+"; sleptDaySeconds:"+str(self.sleptDaySeconds)+"; avgNightSleepSeconds:"+str(self.avgNightSleepSeconds)+"; avgDaySleepSeconds:"+str(self.avgDaySleepSeconds)+"; goodNightsSleepScore:"+str(self.goodNightsSleepScore)
 
 class timePeriod(object):
     def __init__(self,name,begins,ends):
@@ -63,8 +94,10 @@ class timePeriod(object):
         self.activitiesAndTimePercentages = {}
         self.subperiods = {}
         self.seconds = (self.ends - self.begins).total_seconds()
+        startDate = self.begins
+        self.startDate = startDate.strftime("%Y-%m-%d")
     def __str__(self):
-        return "timePeriod name:"+str(self.name)+": starts:"+str(self.begins)+"; ends:"+str(self.ends)+"; seconds;"+str(self.seconds)
+        return "timePeriod name:"+str(self.name)+"; startDate:"+str(self.startDate)+" starts:"+str(self.begins)+"; ends:"+str(self.ends)+"; seconds;"+str(self.seconds)
 
 class activityInstance(object):
     def __init__(self,item):
@@ -72,13 +105,15 @@ class activityInstance(object):
         startTime = item[1]
         endTime = item[2]
         self.name = item[3]
-        self.start = dt.datetime.strptime(str(startDate)+" "+str(startTime), "%d/%m/%y %H:%M:%S")
-        self.end = dt.datetime.strptime(str(startDate)+" "+str(endTime), "%d/%m/%y %H:%M:%S")
-        if self.end < self.start:
-            self.end += dt.timedelta(days=1)
-        self.seconds = (self.end - self.start).total_seconds()
+        self.begins = dt.datetime.strptime(str(startDate)+" "+str(startTime), "%d/%m/%y %H:%M:%S")
+        self.ends = dt.datetime.strptime(str(startDate)+" "+str(endTime), "%d/%m/%y %H:%M:%S")
+        if self.ends < self.begins:
+            self.ends += dt.timedelta(days=1)
+        self.seconds = (self.ends - self.begins).total_seconds()
+        startDate = self.begins
+        self.startDate = startDate.strftime("%Y-%m-%d")
     def __str__(self):
-        return "name:"+str(self.name)+"; start:"+str(self.start)+"; end:"+str(self.end)+"; seconds:"+str(self.seconds)
+        return "name:"+str(self.name)+"; startDate:"+str(self.startDate)+" start:"+str(self.begins)+"; end:"+str(self.ends)+"; seconds:"+str(self.seconds)
 
 #        self.startDate = item[0]
 #        self.formatDate(self.startDate)
@@ -152,10 +187,12 @@ def getMaxAndMinDates(analysisDataList):
     earliestDate = analysisDataList[0]
     latestDate = analysisDataList[0]
     for item in analysisDataList:
-        if item.start < earliestDate.start:
+        if item.begins < earliestDate.begins:
             earliestDate = item
-        if item.end > latestDate.end:
+        if item.ends > latestDate.ends:
             latestDate = item
+    print "earliestDate = "+str(earliestDate)
+    print "latestDate = "+str(latestDate)
     return latestDate, earliestDate
         
 #    dateTimeList = []
@@ -179,6 +216,6 @@ def go():
     analysisDataList = formatDataForAnalysis(listOfInputLists)
     maxDate, minDate = getMaxAndMinDates(analysisDataList)
 
-    formatDataForAnalysis(analysisDataList,maxDate,minDate)
+    analyseData(analysisDataList,maxDate,minDate)
 
 go()
