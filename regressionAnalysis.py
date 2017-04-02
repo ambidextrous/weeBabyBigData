@@ -8,7 +8,7 @@ import sys
 import time
 from matplotlib.backends.backend_pdf import PdfPages
 
-def analyseData(plotDataList,maxDate,minDate):
+def analyseData(activitiesList,maxDate,minDate):
     
     dayLengthHours = 24
     nightStartTimeHours = 23
@@ -54,15 +54,34 @@ def analyseData(plotDataList,maxDate,minDate):
         print period.subperiods["night"]
         print ""
 
-    # Creates a dictionary of dataItem objects, each holding one twentyFourHourPeriod and with that twentyFourHourPeriod's start date as its key
-    dataItems = {}
+    # Creates a dictionary of dataItem objects, with start date keys of the form "2019-01-27" and timePeriod values
+    dataItemsDict = {}
     for period in twentyFourHourPeriods:
         item = dataItem("dataItem",period)
-        dataItems[item.startDate] = item
+        dataItemsDict[item.startDate] = item
 
-    print dataItems
+    print dataItemsDict
 
+    # Creates a dictionary of activity objects, with start date keys and of the form "2019-01-27" and values containing lists of activityInstance values
+    activityInstancesDict = {}
+    for activity in activitiesList:
+        activitiesStartingOnDate = []
+        if len(activityInstancesDict[activity.startDate]) == 0:
+            activityInstancesDict[activity.startDate] = [activity]
+        else:
+            activityInstancesDict[activity.startDate].append(activity)
+    print activityInstancesDict
 
+    addActivitiesToTwentyFourHourPeriods(dataItemsDict,twentyFourHourPeriodDict)
+
+def addActivitiesToTwentyFourHourPeriods(activitiesDict,twentyFourHourPeriodDict):
+    activitiesSpillingIntoNextDay = {}
+    for key in twentyFourHourPeriodDict:
+        for activityList in activitiesDict[key]:
+        if len(activitiesDict[key]) > 0:
+            for activity in activityList:
+                if activity.begins >= twentyFourHourPeriodDict[key].begins and activity.ends <= twentyFourHourPeriodDict[key]:
+                    twentyFourHourPeriodDict[key].activities.append(activity)
 
 class dataItem(object):
     def __init__(self,name,twentyFourHourPeriod):
@@ -70,7 +89,7 @@ class dataItem(object):
         self.twentyFourHourPeriod = twentyFourHourPeriod
         startDate = self.twentyFourHourPeriod.begins
         self.startDate = startDate.strftime("%Y-%m-%d")
-        self.activities = {}
+        self.activities = []
         self.subperiods = []
         self.nightSleepPeriods = []
         self.daySleepPeriods = []
@@ -213,9 +232,9 @@ def go():
     for i in range(len(dataFiles)):
         nextList = readDataFromFile(dataFiles[i],activityTypes[i])
         listOfInputLists.append(nextList)
-    analysisDataList = formatDataForAnalysis(listOfInputLists)
-    maxDate, minDate = getMaxAndMinDates(analysisDataList)
+    activitiesList = formatDataForAnalysis(listOfInputLists)
+    maxDate, minDate = getMaxAndMinDates(activitiesList)
 
-    analyseData(analysisDataList,maxDate,minDate)
+    analyseData(activitiesList,maxDate,minDate)
 
 go()

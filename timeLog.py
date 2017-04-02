@@ -213,7 +213,7 @@ def getMaxAndMinDates(plotDataList):
     return maxDate, minDate
 
 def go():
-    dataFiles = ['sleepDataStartingMarch22.csv']#,'feedingDataStartingMarch22.csv']
+    dataFiles = ['sleepDataStartingMarch22.csv','feedingDataStartingMarch22.csv']
     listOfInputLists = []
     for i in range(len(dataFiles)):
         nextList = readDataFromFile(dataFiles[i],i)
