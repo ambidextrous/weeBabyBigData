@@ -67,10 +67,11 @@ def analyseData(activitiesList,maxDate,minDate):
     activityInstancesDict = {}
     for activity in activitiesList:
         activitiesStartingOnDate = []
-        if len(activityInstancesDict[activity.startDate]) == 0:
-            activityInstancesDict[activity.startDate] = [activity]
+        key = activity.startDate
+        if key not in activityInstancesDict:
+            activityInstancesDict[key] = [activity]
         else:
-            activityInstancesDict[activity.startDate].append(activity)
+            activityInstancesDict[key].append(activity)
     print activityInstancesDict
 
     dataItemsDict = addActivitiesToDataItems(dataItemsDict,activityInstancesDict)
@@ -88,25 +89,25 @@ def addActivitiesToDataItems(dataItemsDict,activityInstancesDict):
         # Depending on when the activity starts and finishes
         for activity in activitiesList:
             # Add activity to the item.daytimeActivities list
-            if activity.begins >= period.begins and actvity.ends <= nightfall:
-                item.dayActivities.append(actvity)
+            if activity.begins >= period.begins and activity.ends <= nightfall:
+                item.dayActivities.append(activity)
             # Add the activityto the item.nighttimeActivities list
-            elif activity.begins >= nightfall and actvity.ends <= item.ends:
+            elif activity.begins >= nightfall and activity.ends <= item.ends:
                 item.nightActivities.append(activity)
             # Split the activity in two and add part to the daytimeActivities list and part to the nighttimeActivities list
             elif activity.begins <= nightfall and activity.ends > nightfall:
-                daytimeActivityPortion = actvity.copy()
+                daytimeActivityPortion = copy.copy(activity)
                 daytimeActivityPortion.endTime = nightfall
                 item.dayActivities.append(daytimeActivityPortion)
-                nighttimeActivityPortion = actvity.copy()
+                nighttimeActivityPortion = copy.copy(activity)
                 nighttimeActivityPortion.startTime = nightfall
-                item.nighttimeActivityPortion.startTime.append(nighttimeActivityPortion)
+                item.nightActivities.append(nighttimeActivityPortion)
             # Split activity in two and add part to nighttimeActivities list and part to daytimeActivities list for following day
-            elif activity.begin >= nightfall and activity.ends > item.ends:
-                nighttimeActivityPortion = activity.copy()
+            elif activity.begins >= nightfall and activity.ends > item.ends:
+                nighttimeActivityPortion = copy.copy(activity)
                 nighttimeActivityPortion.endTime = item.ends
                 item.nighttimeActivities.append(nighttimeActivityPortion)
-                nextDayActivityPortion = actvity.copy()
+                nextDayActivityPortion = copy.copy(activity)
                 nextDayActivityPortion.startTime = item.startTime + dt.timedelta(days=1)
                 nextDateDateItem = dataItemsDict[nextDateKey]
                 nextDateDateItem.dayActivities.append(nextDayActivityPortion)
@@ -134,7 +135,7 @@ class dataItem(object):
         self.goodNightsSleepScore = 1.0
         print (self)
     def __str__(self):
-        return "name:"+str(self.name)+"; startDate:"+str(self.startDate)+"; activities:"+str(self.activities)+"; subperiods"+str(self.subperiods)+"; day:"+str(self.day)+"; night:"+str(self.night)+"; slept24HoursSeconds:"+str(self.slept24HoursSeconds)+"; sleptNightSeconds:"+str(self.sleptNightSeconds)+"; sleptDaySeconds:"+str(self.sleptDaySeconds)+"; avgNightSleepSeconds:"+str(self.avgNightSleepSeconds)+"; avgDaySleepSeconds:"+str(self.avgDaySleepSeconds)+"; goodNightsSleepScore:"+str(self.goodNightsSleepScore)
+        return "name:"+str(self.name)+"; startDate:"+str(self.startDate)+"; nightActivities:"+str(self.nightActivities)+"; dayActivities:"+str(self.dayActivities)+"; subperiods"+str(self.subperiods)+"; day:"+str(self.day)+"; night:"+str(self.night)+"; slept24HoursSeconds:"+str(self.slept24HoursSeconds)+"; sleptNightSeconds:"+str(self.sleptNightSeconds)+"; sleptDaySeconds:"+str(self.sleptDaySeconds)+"; avgNightSleepSeconds:"+str(self.avgNightSleepSeconds)+"; avgDaySleepSeconds:"+str(self.avgDaySleepSeconds)+"; goodNightsSleepScore:"+str(self.goodNightsSleepScore)
 
 class timePeriod(object):
     def __init__(self,name,begins,ends):
