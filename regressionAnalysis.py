@@ -6,6 +6,7 @@ import datetime as dt
 import csv
 import sys
 import time
+import copy
 from matplotlib.backends.backend_pdf import PdfPages
 
 def analyseData(activitiesList,maxDate,minDate):
@@ -72,29 +73,59 @@ def analyseData(activitiesList,maxDate,minDate):
             activityInstancesDict[activity.startDate].append(activity)
     print activityInstancesDict
 
-    addActivitiesToTwentyFourHourPeriods(dataItemsDict,twentyFourHourPeriodDict)
+    dataItemsDict = addActivitiesToDataItems(dataItemsDict,activityInstancesDict)
 
-def addActivitiesToTwentyFourHourPeriods(activitiesDict,twentyFourHourPeriodDict):
-    activitiesSpillingIntoNextDay = {}
-    for key in twentyFourHourPeriodDict:
-        for activityList in activitiesDict[key]:
-        if len(activitiesDict[key]) > 0:
-            for activity in activityList:
-                if activity.begins >= twentyFourHourPeriodDict[key].begins and activity.ends <= twentyFourHourPeriodDict[key]:
-                    twentyFourHourPeriodDict[key].activities.append(activity)
+    print dataItemsDict
+
+def addActivitiesToDataItems(dataItemsDict,activityInstancesDict):
+    activitiesSpillingIntoNextDay = []
+    for key in dataItemsDict:
+        item = dataItemsDict[key]
+        period = item.twentyFourHourPeriod
+        activitiesList = activityInstancesDict[key]
+        nightfall = item.nightfall
+        nextDateKey = item.nextDate
+        # Depending on when the activity starts and finishes
+        for activity in activitiesList:
+            # Add activity to the item.daytimeActivities list
+            if activity.begins >= period.begins and actvity.ends <= nightfall:
+                item.dayActivities.append(actvity)
+            # Add the activityto the item.nighttimeActivities list
+            elif activity.begins >= nightfall and actvity.ends <= item.ends:
+                item.nightActivities.append(activity)
+            # Split the activity in two and add part to the daytimeActivities list and part to the nighttimeActivities list
+            elif activity.begins <= nightfall and activity.ends > nightfall:
+                daytimeActivityPortion = actvity.copy()
+                daytimeActivityPortion.endTime = nightfall
+                item.dayActivities.append(daytimeActivityPortion)
+                nighttimeActivityPortion = actvity.copy()
+                nighttimeActivityPortion.startTime = nightfall
+                item.nighttimeActivityPortion.startTime.append(nighttimeActivityPortion)
+            # Split activity in two and add part to nighttimeActivities list and part to daytimeActivities list for following day
+            elif activity.begin >= nightfall and activity.ends > item.ends:
+                nighttimeActivityPortion = activity.copy()
+                nighttimeActivityPortion.endTime = item.ends
+                item.nighttimeActivities.append(nighttimeActivityPortion)
+                nextDayActivityPortion = actvity.copy()
+                nextDayActivityPortion.startTime = item.startTime + dt.timedelta(days=1)
+                nextDateDateItem = dataItemsDict[nextDateKey]
+                nextDateDateItem.dayActivities.append(nextDayActivityPortion)
+    return dataItemsDict
 
 class dataItem(object):
     def __init__(self,name,twentyFourHourPeriod):
         self.name = name
         self.twentyFourHourPeriod = twentyFourHourPeriod
         startDate = self.twentyFourHourPeriod.begins
+        nextDate = self.twentyFourHourPeriod.begins + dt.timedelta(days=1)
         self.startDate = startDate.strftime("%Y-%m-%d")
-        self.activities = []
+        self.nextDate = nextDate.strftime("%Y-%m-%d")
+        self.nightActivities = []
+        self.dayActivities = []
         self.subperiods = []
-        self.nightSleepPeriods = []
-        self.daySleepPeriods = []
         self.day = twentyFourHourPeriod.subperiods["day"]
         self.night = twentyFourHourPeriod.subperiods["night"]
+        self.nightfall = self.night.begins
         self.slept24HoursSeconds = 1.0
         self.sleptNightSeconds = 1.0
         self.sleptDaySeconds = 1.0
