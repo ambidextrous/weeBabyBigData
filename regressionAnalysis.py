@@ -61,7 +61,6 @@ def analyseData(activitiesList,maxDate,minDate):
         item = dataItem("dataItem",period)
         dataItemsDict[item.startDate] = item
 
-    print dataItemsDict
 
     # Creates a dictionary of activity objects, with start date keys and of the form "2019-01-27" and values containing lists of activityInstance values
     activityInstancesDict = {}
@@ -76,7 +75,36 @@ def analyseData(activitiesList,maxDate,minDate):
 
     dataItemsDict = addActivitiesToDataItems(dataItemsDict,activityInstancesDict)
 
-    print dataItemsDict
+    dataItemsDict = calculateAnalysisDataValues(dataItemsDict)
+
+def calculateAnalysisDataValues(dataItemsDict):
+
+    for key in dataItemsDict:
+        item = dataItemsDict[key]
+        # Calculates total seconds slept during night
+        secondsSleptInNight = 0.0
+        for activity in item.nightActivities:
+            print "night activity = "+str(activity)
+            if activity.name == "sleeping":
+                secondsSleptInNight += activity.seconds
+        item.sleptNightSeconds = secondsSleptInNight
+        # Calculates total seconds slept during day
+        secondsSleptInDay = 0.0
+        for activity in item.dayActivities:
+            print "day activity = "+str(activity)
+            if activity.name == "sleeping":
+                secondsSleptInDay += activity.seconds
+        item.sleptDaySeconds = secondsSleptInDay
+        # Calculates total seconds slept in twentyFourHourPeriod
+        item.slept24HoursSeconds = item.sleptNightSeconds + item.sleptDaySeconds
+
+        print str(key)
+        print "sleptNightSeconds = "+str(item.sleptNightSeconds)
+        print "sleptDaySeconds = "+str(item.sleptDaySeconds)
+        print "slept24HoursSeconds = "+str(item.slept24HoursSeconds)
+        print ""
+
+    return dataItemsDict
 
 def addActivitiesToDataItems(dataItemsDict,activityInstancesDict):
     activitiesSpillingIntoNextDay = []
@@ -127,6 +155,8 @@ class dataItem(object):
         self.day = twentyFourHourPeriod.subperiods["day"]
         self.night = twentyFourHourPeriod.subperiods["night"]
         self.nightfall = self.night.begins
+        self.starts = self.twentyFourHourPeriod.begins
+        self.ends = self.twentyFourHourPeriod.ends
         self.slept24HoursSeconds = 1.0
         self.sleptNightSeconds = 1.0
         self.sleptDaySeconds = 1.0
