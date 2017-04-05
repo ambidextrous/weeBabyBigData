@@ -71,7 +71,7 @@ def analyseData(activitiesList,maxDate,minDate):
             activityInstancesDict[key] = [activity]
         else:
             activityInstancesDict[key].append(activity)
-    print activityInstancesDict
+    #print activityInstancesDict
 
     dataItemsDict = addActivitiesToDataItems(dataItemsDict,activityInstancesDict)
 
@@ -84,31 +84,33 @@ def calculateAnalysisDataValues(dataItemsDict):
         # Calculates total seconds slept during night
         secondsSleptInNight = 0.0
         for activity in item.nightActivities:
-            print "night activity = "+str(activity)
+            #print "night activity = "+str(activity)
             if activity.name == "sleeping":
                 secondsSleptInNight += activity.seconds
         item.sleptNightSeconds = secondsSleptInNight
         # Calculates total seconds slept during day
         secondsSleptInDay = 0.0
         for activity in item.dayActivities:
-            print "day activity = "+str(activity)
+            #print "day activity = "+str(activity)
             if activity.name == "sleeping":
                 secondsSleptInDay += activity.seconds
         item.sleptDaySeconds = secondsSleptInDay
         # Calculates total seconds slept in twentyFourHourPeriod
         item.slept24HoursSeconds = item.sleptNightSeconds + item.sleptDaySeconds
 
-        print str(key)
-        print "sleptNightSeconds = "+str(item.sleptNightSeconds)
-        print "sleptDaySeconds = "+str(item.sleptDaySeconds)
-        print "slept24HoursSeconds = "+str(item.slept24HoursSeconds)
-        print ""
+        #print str(key)
+        #print "sleptNightSeconds = "+str(item.sleptNightSeconds)
+        #print "sleptDaySeconds = "+str(item.sleptDaySeconds)
+        #print "slept24HoursSeconds = "+str(item.slept24HoursSeconds)
+        #print ""
 
     return dataItemsDict
 
 def addActivitiesToDataItems(dataItemsDict,activityInstancesDict):
     activitiesSpillingIntoNextDay = []
     for key in dataItemsDict:
+        print ""
+        print str(key)
         item = dataItemsDict[key]
         period = item.twentyFourHourPeriod
         activitiesList = activityInstancesDict[key]
@@ -117,7 +119,12 @@ def addActivitiesToDataItems(dataItemsDict,activityInstancesDict):
         # Depending on when the activity starts and finishes
         for activity in activitiesList:
             # Add activity to the item.daytimeActivities list
+            print "activity.begins = "+str(activity.begins)
+            print "period.begins = "+str(period.begins)
+            print "activity.ends = "+str(activity.ends)
+            print "nightfall = "+str(nightfall)
             if activity.begins >= period.begins and activity.ends <= nightfall:
+                print "True:activity.begins >= period.begins and activity.ends <= nightfall"
                 item.dayActivities.append(activity)
             # Add the activityto the item.nighttimeActivities list
             elif activity.begins >= nightfall and activity.ends <= item.ends:
