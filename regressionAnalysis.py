@@ -73,9 +73,23 @@ def analyseData(activitiesList,maxDate,minDate):
             activityInstancesDict[key].append(activity)
     #print activityInstancesDict
 
-    dataItemsDict = addActivitiesToDataItems(dataItemsDict,activityInstancesDict)
+    #dataItemsDict = addActivitiesToDataItems(dataItemsDict,activityInstancesDict)
+
+
+    dataItemsDict = addActivitiesToDataItems(dataItemsDict,activitiesList)
 
     dataItemsDict = calculateAnalysisDataValues(dataItemsDict)
+
+    for key in dataItemsDict:
+        print dataItemsDict[key].starts
+        print dataItemsDict[key].ends
+        print "nightActivities"
+        for item in dataItemsDict[key].nightActivities:
+            print item
+        print "dayActivities"
+        for item in dataItemsDict[key].dayActivities:
+            print item
+        print ""
 
 def calculateAnalysisDataValues(dataItemsDict):
 
@@ -106,31 +120,27 @@ def calculateAnalysisDataValues(dataItemsDict):
 
     return dataItemsDict
 
-def addActivitiesToDataItems(dataItemsDict,activityInstancesDict):
+def addActivitiesToDataItems(dataItemsDict,activitiesList):
     activitiesSpillingIntoNextDay = []
     for key in dataItemsDict:
-        print ""
-        print str(key)
         item = dataItemsDict[key]
         period = item.twentyFourHourPeriod
-        activitiesList = activityInstancesDict[key]
         nightfall = item.nightfall
         nextDateKey = item.nextDate
         # Depending on when the activity starts and finishes
         for activity in activitiesList:
             # Add activity to the item.daytimeActivities list
-            print "activity.begins = "+str(activity.begins)
-            print "period.begins = "+str(period.begins)
-            print "activity.ends = "+str(activity.ends)
-            print "nightfall = "+str(nightfall)
             if activity.begins >= period.begins and activity.ends <= nightfall:
-                print "True:activity.begins >= period.begins and activity.ends <= nightfall"
+                #print "True:activity.begins >= period.begins and activity.ends <= nightfall"
+                print "A"
                 item.dayActivities.append(activity)
             # Add the activityto the item.nighttimeActivities list
             elif activity.begins >= nightfall and activity.ends <= item.ends:
+                print "B"
                 item.nightActivities.append(activity)
             # Split the activity in two and add part to the daytimeActivities list and part to the nighttimeActivities list
             elif activity.begins <= nightfall and activity.ends > nightfall:
+                print "C"
                 daytimeActivityPortion = copy.copy(activity)
                 daytimeActivityPortion.endTime = nightfall
                 item.dayActivities.append(daytimeActivityPortion)
@@ -139,11 +149,12 @@ def addActivitiesToDataItems(dataItemsDict,activityInstancesDict):
                 item.nightActivities.append(nighttimeActivityPortion)
             # Split activity in two and add part to nighttimeActivities list and part to daytimeActivities list for following day
             elif activity.begins >= nightfall and activity.ends > item.ends:
+                print "D"
                 nighttimeActivityPortion = copy.copy(activity)
                 nighttimeActivityPortion.endTime = item.ends
-                item.nighttimeActivities.append(nighttimeActivityPortion)
+                item.nightActivities.append(nighttimeActivityPortion)
                 nextDayActivityPortion = copy.copy(activity)
-                nextDayActivityPortion.startTime = item.startTime + dt.timedelta(days=1)
+                nextDayActivityPortion.startTime = item.ends
                 nextDateDateItem = dataItemsDict[nextDateKey]
                 nextDateDateItem.dayActivities.append(nextDayActivityPortion)
     return dataItemsDict
