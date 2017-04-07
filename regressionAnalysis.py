@@ -46,15 +46,15 @@ def analyseData(activitiesList,maxDate,minDate):
         day = timePeriod("day",dawn,dusk)
         period.subperiods["day"] = day
 
-    # Test print
-    for period in twentyFourHourPeriods:
-        print period
-        #for subperiod in period.subperiods:
-        #    print str(subperiod)
-        print period.subperiods["day"]
-        print period.subperiods["night"]
-        print ""
-
+#    # Test print
+#    for period in twentyFourHourPeriods:
+#        print period
+#        #for subperiod in period.subperiods:
+#        #    print str(subperiod)
+#        print period.subperiods["day"]
+#        print period.subperiods["night"]
+#        print ""
+#
     # Creates a dictionary of dataItem objects, with start date keys of the form "2019-01-27" and timePeriod values
     dataItemsDict = {}
     for period in twentyFourHourPeriods:
@@ -84,10 +84,12 @@ def analyseData(activitiesList,maxDate,minDate):
 
 
     testPrintSpecificItemKey(dataItemsDict,"2017-03-13")
+    testPrintSpecificItemKey(dataItemsDict,"2017-03-14")
 
 def testPrintSpecificItemKey(dataItemsDict,key):
     print dataItemsDict[key].starts
     print dataItemsDict[key].ends
+    print "nightfall = "+str(dataItemsDict[key].nightfall)
     print "nightActivities"
     for item in dataItemsDict[key].nightActivities:
         print item
@@ -100,6 +102,7 @@ def testPrintDataItems(dataItemsDict):
     for key in dataItemsDict:
         print dataItemsDict[key].starts
         print dataItemsDict[key].ends
+        print "nightfall = "+str(item.nightfall)
         print "nightActivities"
         for item in dataItemsDict[key].nightActivities:
             print item
@@ -117,14 +120,14 @@ def calculateAnalysisDataValues(dataItemsDict):
         for activity in item.nightActivities:
             #print "night activity = "+str(activity)
             if activity.name == "sleeping":
-                secondsSleptInNight += activity.seconds
+                secondsSleptInNight += activity.getSeconds()
         item.sleptNightSeconds = secondsSleptInNight
         # Calculates total seconds slept during day
         secondsSleptInDay = 0.0
         for activity in item.dayActivities:
             #print "day activity = "+str(activity)
             if activity.name == "sleeping":
-                secondsSleptInDay += activity.seconds
+                secondsSleptInDay += activity.getSeconds()
         item.sleptDaySeconds = secondsSleptInDay
         # Calculates total seconds slept in twentyFourHourPeriod
         item.slept24HoursSeconds = item.sleptNightSeconds + item.sleptDaySeconds
@@ -152,25 +155,22 @@ def addActivitiesToDataItems(dataItemsDict,activitiesList):
                 item.dayActivities.append(activity)
             # Add the activityto the item.nighttimeActivities list
             elif activity.begins >= nightfall and activity.ends <= item.ends:
-                print "B"
                 item.nightActivities.append(activity)
             # Split the activity in two and add part to the daytimeActivities list and part to the nighttimeActivities list
             elif activity.begins <= nightfall and activity.ends > nightfall:
-                print "C"
                 daytimeActivityPortion = copy.copy(activity)
-                daytimeActivityPortion.endTime = nightfall
+                daytimeActivityPortion.ends = nightfall
                 item.dayActivities.append(daytimeActivityPortion)
                 nighttimeActivityPortion = copy.copy(activity)
-                nighttimeActivityPortion.startTime = nightfall
+                nighttimeActivityPortion.begins = nightfall
                 item.nightActivities.append(nighttimeActivityPortion)
             # Split activity in two and add part to nighttimeActivities list and part to daytimeActivities list for following day
             elif activity.begins >= nightfall and activity.begins < item.ends and activity.ends > item.ends:
-                print "D"
                 nighttimeActivityPortion = copy.copy(activity)
                 nighttimeActivityPortion.ends = item.ends
                 item.nightActivities.append(nighttimeActivityPortion)
                 nextDayActivityPortion = copy.copy(activity)
-                nextDayActivityPortion.starts = item.ends
+                nextDayActivityPortion.begins = item.ends
                 nextDateDateItem = dataItemsDict[nextDateKey]
                 nextDateDateItem.dayActivities.append(nextDayActivityPortion)
     return dataItemsDict
@@ -188,7 +188,7 @@ class dataItem(object):
         self.subperiods = []
         self.day = twentyFourHourPeriod.subperiods["day"]
         self.night = twentyFourHourPeriod.subperiods["night"]
-        self.nightfall = self.night.begins
+        self.nightfall = self.night.begins + dt.timedelta(hours=1)
         self.starts = self.twentyFourHourPeriod.begins
         self.ends = self.twentyFourHourPeriod.ends
         self.slept24HoursSeconds = 1.0
@@ -197,7 +197,7 @@ class dataItem(object):
         self.avgNightSleepSeconds = 1.0
         self.avgDaySleepSeconds = 1.0
         self.goodNightsSleepScore = 1.0
-        print (self)
+        #print (self)
     def __str__(self):
         return "name:"+str(self.name)+"; startDate:"+str(self.startDate)+"; nightActivities:"+str(self.nightActivities)+"; dayActivities:"+str(self.dayActivities)+"; subperiods"+str(self.subperiods)+"; day:"+str(self.day)+"; night:"+str(self.night)+"; slept24HoursSeconds:"+str(self.slept24HoursSeconds)+"; sleptNightSeconds:"+str(self.sleptNightSeconds)+"; sleptDaySeconds:"+str(self.sleptDaySeconds)+"; avgNightSleepSeconds:"+str(self.avgNightSleepSeconds)+"; avgDaySleepSeconds:"+str(self.avgDaySleepSeconds)+"; goodNightsSleepScore:"+str(self.goodNightsSleepScore)
 
@@ -224,11 +224,13 @@ class activityInstance(object):
         self.ends = dt.datetime.strptime(str(startDate)+" "+str(endTime), "%d/%m/%y %H:%M:%S")
         if self.ends < self.begins:
             self.ends += dt.timedelta(days=1)
-        self.seconds = (self.ends - self.begins).total_seconds()
+        #self.seconds = (self.ends - self.begins).total_seconds()
         startDate = self.begins
         self.startDate = startDate.strftime("%Y-%m-%d")
+    def getSeconds(self):
+        return (self.ends - self.begins).total_seconds()
     def __str__(self):
-        return "name:"+str(self.name)+"; startDate:"+str(self.startDate)+" start:"+str(self.begins)+"; end:"+str(self.ends)+"; seconds:"+str(self.seconds)
+        return "name:"+str(self.name)+"; startDate:"+str(self.startDate)+" start:"+str(self.begins)+"; end:"+str(self.ends)+"; seconds:"+str(self.getSeconds())
 
 #        self.startDate = item[0]
 #        self.formatDate(self.startDate)
