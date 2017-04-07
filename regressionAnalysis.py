@@ -46,15 +46,6 @@ def analyseData(activitiesList,maxDate,minDate):
         day = timePeriod("day",dawn,dusk)
         period.subperiods["day"] = day
 
-#    # Test print
-#    for period in twentyFourHourPeriods:
-#        print period
-#        #for subperiod in period.subperiods:
-#        #    print str(subperiod)
-#        print period.subperiods["day"]
-#        print period.subperiods["night"]
-#        print ""
-#
     # Creates a dictionary of dataItem objects, with start date keys of the form "2019-01-27" and timePeriod values
     dataItemsDict = {}
     for period in twentyFourHourPeriods:
@@ -71,25 +62,41 @@ def analyseData(activitiesList,maxDate,minDate):
             activityInstancesDict[key] = [activity]
         else:
             activityInstancesDict[key].append(activity)
-    #print activityInstancesDict
-
-    #dataItemsDict = addActivitiesToDataItems(dataItemsDict,activityInstancesDict)
-
 
     dataItemsDict = addActivitiesToDataItems(dataItemsDict,activitiesList)
 
     dataItemsDict = calculateAnalysisDataValues(dataItemsDict)
 
-    #testPrintDataItems(dataItemsDict)
 
+    dataItemsDict = setHoursSleptDayAndNight(dataItemsDict)
 
     testPrintSpecificItemKey(dataItemsDict,"2017-03-13")
     testPrintSpecificItemKey(dataItemsDict,"2017-03-14")
+
+def convertSecondsToHMS(secs):
+    return dt.timedelta(seconds=secs)
+
+def setHoursSleptDayAndNight(dataItemsDict):
+    for key in dataItemsDict:
+        item = dataItemsDict[key]
+        totalSecsSleptNight = 0.0
+        for activity in item.nightActivities:
+            totalSecsSleptNight += activity.getSeconds()
+        item.sleptNightSeconds = totalSecsSleptNight
+        totalSecsSleptDay = 0.0
+        for activity in item.dayActivities:
+            totalSecsSleptDay += activity.getSeconds()
+        item.totalSecsSleptDay = totalSecsSleptDay
+    return dataItemsDict
 
 def testPrintSpecificItemKey(dataItemsDict,key):
     print dataItemsDict[key].starts
     print dataItemsDict[key].ends
     print "nightfall = "+str(dataItemsDict[key].nightfall)
+    print "sleptNightSeconds = "+str(dataItemsDict[key].sleptNightSeconds)
+    print "slept night H:M:S = "+str(dt.timedelta(seconds=dataItemsDict[key].sleptNightSeconds))
+    print "sleptDaySeconds = "+str(dataItemsDict[key].sleptDaySeconds)
+    print "slept day H:M:S = "+str(dt.timedelta(seconds=dataItemsDict[key].sleptDaySeconds))
     print "nightActivities"
     for item in dataItemsDict[key].nightActivities:
         print item
@@ -131,13 +138,6 @@ def calculateAnalysisDataValues(dataItemsDict):
         item.sleptDaySeconds = secondsSleptInDay
         # Calculates total seconds slept in twentyFourHourPeriod
         item.slept24HoursSeconds = item.sleptNightSeconds + item.sleptDaySeconds
-
-        #print str(key)
-        #print "sleptNightSeconds = "+str(item.sleptNightSeconds)
-        #print "sleptDaySeconds = "+str(item.sleptDaySeconds)
-        #print "slept24HoursSeconds = "+str(item.slept24HoursSeconds)
-        #print ""
-
     return dataItemsDict
 
 def addActivitiesToDataItems(dataItemsDict,activitiesList):
@@ -224,31 +224,14 @@ class activityInstance(object):
         self.ends = dt.datetime.strptime(str(startDate)+" "+str(endTime), "%d/%m/%y %H:%M:%S")
         if self.ends < self.begins:
             self.ends += dt.timedelta(days=1)
-        #self.seconds = (self.ends - self.begins).total_seconds()
         startDate = self.begins
         self.startDate = startDate.strftime("%Y-%m-%d")
     def getSeconds(self):
         return (self.ends - self.begins).total_seconds()
+    def getHoursMinutesSeconds(self):
+        return str(dt.timedelta(seconds=self.getSeconds()))
     def __str__(self):
         return "name:"+str(self.name)+"; startDate:"+str(self.startDate)+" start:"+str(self.begins)+"; end:"+str(self.ends)+"; seconds:"+str(self.getSeconds())
-
-#        self.startDate = item[0]
-#        self.formatDate(self.startDate)
-#        self.startTime = item[1]
-#        self.endTime = item[2]
-#        self.name = item[3]
-#        self.getStart()
-#        print str(self)
-#    def getStart(self):
-#        self.startDatetime = time.strptime(str(self.startDay)+" "+str(self.startMonth)+" "+str(self.startYear), "%d %m %y")
-#    # Extracts date information variables
-#    def formatDate(self,unformattedDate):
-#        date = dt.datetime.strptime(unformattedDate,"%d/%m/%y")
-#        self.startDay = int(date.strftime("%d"))
-#        self.startMonth = int(date.strftime("%m"))
-#        self.startYear = int(date.strftime("%Y"))
-#    def __str__(self):
-#        return "activity name:"+self.name+"; startDate:"+self.startDate+"; startTime:"+self.startTime+"; endTime:"+self.endTime+"; datetime:"+str(self.startDatetime)
 
 # Read data from csv file
 def readDataFromFile(dataFile,activityName):
@@ -262,32 +245,6 @@ def readDataFromFile(dataFile,activityName):
     finally:
         f.close()
     return listOfInputLists
-
-## Class to store time and date data read from file
-#class activityInstance(object):
-#    def __init__(self,listOfInputLists):
-#        self.day = 0
-#        self.month = 0
-#        self.year = 0
-#        self.formatDate(listOfInputLists[0])
-#        self.startTime = self.formatTime(listOfInputLists[1])
-#        self.stopTime = self.formatTime(listOfInputLists[2])
-#        self.activityIndex = int(listOfInputLists[3])
-#
-#    # Extracts date information variables
-#    def formatDate(self,unformattedDate):
-#        date = dt.datetime.strptime(unformattedDate,"%d/%m/%y")
-#        self.day = int(date.strftime("%d"))
-#        self.month = int(date.strftime("%m"))
-#        self.year = int(date.strftime("%Y"))
-#
-#    # Formats time as a decimal fraction of day, for use in graph
-#    def formatTime(self,unformattedTime):
-#        timeSinceMidnight = dt.datetime.strptime(unformattedTime,'%H:%M:%S')
-#        midnight = dt.datetime(1900,1,1)
-#        minutesSinceMidnight = ((timeSinceMidnight - midnight).total_seconds() / 60.0)
-#        fractionOfDay = minutesSinceMidnight / MINUTES_IN_DAY
-#        return fractionOfDay
 
 # Formats data read from file as a list of eventInstance objects
 def formatDataForAnalysis(listOfInputLists):
@@ -311,17 +268,6 @@ def getMaxAndMinDates(analysisDataList):
     print "earliestDate = "+str(earliestDate)
     print "latestDate = "+str(latestDate)
     return latestDate, earliestDate
-        
-#    dateTimeList = []
-#    for item in plotDataList:
-#        nextDate = dt.datetime(item.year,item.month,item.day)
-#        dateTimeList.append(nextDate)
-#    maxDate = max(dateTimeList)
-#    minDate = min(dateTimeList)
-#    # Ensure minimun of three days displayed 
-#    if not maxDate > minDate + dt.timedelta(days=1):
-#        maxDate = minDate + dt.timedelta(days=2)
-#    return maxDate, minDate
 
 def go():
     dataFiles = ['sleepDataStartingMarch22.csv']#,'feedingDataStartingMarch22.csv']
