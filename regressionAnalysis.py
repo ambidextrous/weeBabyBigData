@@ -67,14 +67,50 @@ def analyseData(activitiesList,maxDate,minDate):
 
     dataItemsDict = calculateAnalysisDataValues(dataItemsDict)
 
-
     dataItemsDict = setHoursSleptDayAndNight(dataItemsDict)
+
+    dataItemsDict = setLongestSleepDayAndNight(dataItemsDict)
+
+    dataItemsDict = getMedianSleepDayAndNight(dataItemsDict)
 
     testPrintSpecificItemKey(dataItemsDict,"2017-03-13")
     testPrintSpecificItemKey(dataItemsDict,"2017-03-14")
 
+def getMedianSleepDayAndNight(dataItemsDict):
+    epoch = dt.datetime.utcfromtimestamp(0)
+    for key in dataItemsDict:
+        item = dataItemsDict[key]
+        nightActivities = item.nightActivities
+        minutesSleeping = []
+        currentMinute = item.nightfall
+        while currentMinute < item.ends:
+            for activity in nightActivities:
+                if currentMinute >= activity.begins and currentMinute <= activity.ends:
+                    minutesSleeping.append(currentMinute)
+            currentMinute += dt.timedelta(minutes=1)
+        totalMinutesSleeping = dt.timedelta(0).total_seconds()
+        for minute in minutesSleeping:
+            totalMinutesSleeping += (minute-epoch).total_seconds()
+        item.medianSleepTimeNight = totalMinutesSleeping / len(minutesSleeping)
+    return dataItemsDict
+
+def setLongestSleepDayAndNight(dataItemsDict):
+    for key in dataItemsDict:
+        item = dataItemsDict[key]
+        longestSleepNightInSecs = 0.0
+        for activity in item.nightActivities:
+            if activity.getSeconds() > longestSleepNightInSecs:
+                longestSleepNightInSecs = activity.getSeconds()
+        longestSleepDayInSecs = 0.0
+        item.longestNightSleepSecs = longestSleepNightInSecs
+        for activity in item.dayActivities:
+            if activity.getSeconds() > longestSleepDayInSecs:
+                longestSleepDayInSecs = activity.getSeconds()
+        item.longestDaySleepSecs = longestSleepDayInSecs
+    return dataItemsDict
+
 def convertSecondsToHMS(secs):
-    return dt.timedelta(seconds=secs)
+    return str(dt.timedelta(seconds=secs))
 
 def setHoursSleptDayAndNight(dataItemsDict):
     for key in dataItemsDict:
@@ -97,6 +133,9 @@ def testPrintSpecificItemKey(dataItemsDict,key):
     print "slept night H:M:S = "+str(dt.timedelta(seconds=dataItemsDict[key].sleptNightSeconds))
     print "sleptDaySeconds = "+str(dataItemsDict[key].sleptDaySeconds)
     print "slept day H:M:S = "+str(dt.timedelta(seconds=dataItemsDict[key].sleptDaySeconds))
+    print "longestSleepNight = "+convertSecondsToHMS(dataItemsDict[key].longestNightSleepSecs)
+    print "longestSleepDay = "+convertSecondsToHMS(dataItemsDict[key].longestDaySleepSecs)
+    print "medianSleepTimeNight = "+str(item.medianSleepTimeNight)
     print "nightActivities"
     for item in dataItemsDict[key].nightActivities:
         print item
@@ -197,6 +236,10 @@ class dataItem(object):
         self.avgNightSleepSeconds = 1.0
         self.avgDaySleepSeconds = 1.0
         self.goodNightsSleepScore = 1.0
+        self.longestNightSleepSecs = 1.0
+        self.longestDaySleepSecs = 1.0
+        self.medianSleepTimeNight = 0
+        self.medianSleepTimeDay = 0
         #print (self)
     def __str__(self):
         return "name:"+str(self.name)+"; startDate:"+str(self.startDate)+"; nightActivities:"+str(self.nightActivities)+"; dayActivities:"+str(self.dayActivities)+"; subperiods"+str(self.subperiods)+"; day:"+str(self.day)+"; night:"+str(self.night)+"; slept24HoursSeconds:"+str(self.slept24HoursSeconds)+"; sleptNightSeconds:"+str(self.sleptNightSeconds)+"; sleptDaySeconds:"+str(self.sleptDaySeconds)+"; avgNightSleepSeconds:"+str(self.avgNightSleepSeconds)+"; avgDaySleepSeconds:"+str(self.avgDaySleepSeconds)+"; goodNightsSleepScore:"+str(self.goodNightsSleepScore)
