@@ -7,6 +7,7 @@ import csv
 import sys
 import time
 import copy
+from pylab import figtext
 from matplotlib.backends.backend_pdf import PdfPages
 
 def analyseData(activitiesList,maxDate,minDate):
@@ -81,12 +82,86 @@ def analyseData(activitiesList,maxDate,minDate):
     for item in dataItemsDateOrderedList:
         print "date = "+str(item.startDate)
 
-    plotBarChart(dataItemsDateOrderedList)
+    plotDayNightHoursSleptBarChart(dataItemsDateOrderedList)
+
+    plotDayNightLongestContinuousSleepBarChart(dataItemsDateOrderedList)
+
+def plotDayNightLongestContinuousSleepBarChart(dataItemsList):
+    
+    # Data to plot
+    n_groups = len(dataItemsList)
+    longestTimesSleptDuringDay = []
+    longestTimesSleptDuringNight = []
+    dates = []
+
+    secHourConversion = 60 * 60
+
+    for item in dataItemsList:
+        # Adds longest time slept each night
+        longestSleep = dt.timedelta(days=0).total_seconds()
+        for activity in item.nightActivities:
+            if activity.name == "sleeping" and (activity.ends - activity.begins).total_seconds() > longestSleep:
+                longestSleep = (activity.ends - activity.begins).total_seconds()
+        longestTimesSleptDuringNight.append(longestSleep/secHourConversion)
+        # Adds longest time slept each day
+        longestSleep = dt.timedelta(days=0).total_seconds()
+        for activity in item.dayActivities:
+            if activity.name == "sleeping" and (activity.ends - activity.begins).total_seconds() > longestSleep:
+                longestSleep = (activity.ends - activity.begins).total_seconds()
+        longestTimesSleptDuringDay.append(longestSleep/secHourConversion)
+        # Adds date
+        dates.append((item.starts).strftime("%A, %d %B %Y %H:%M"))
+
+    # Create plot
+    fig, ax = plt.subplots(figsize=(20,10))
+    index = np.arange(n_groups)
+    bar_width = 0.35
+    opacity = 0.8
+
+    nightColour = 'b'
+    dayColour = 'k'
+
+    averageNightsSleep = round(sum(longestTimesSleptDuringNight)/len(longestTimesSleptDuringNight),2)
+    averageDaysSleep = round(sum(longestTimesSleptDuringDay)/len(longestTimesSleptDuringDay),2)
+
+    item = dataItemsList[0]
+    daybreak = item.starts.strftime("%H:%M")
+    nightfall = item.nightfall.strftime("%H:%M")
+    nightsEnd = item.ends.strftime("%H:%M")
+
+    rects1 = plt.bar(index+bar_width,longestTimesSleptDuringDay, bar_width,
+                    alpha=opacity,
+                    color=dayColour,
+                    label='Day [Period='+nightfall+'-'+nightsEnd+'] (Avg='+str(averageDaysSleep)+'hrs)')
+    
+
+    rects2 = plt.bar(index,longestTimesSleptDuringNight, bar_width,
+                    alpha=opacity,
+                    color=nightColour,
+                    label='Night [Period='+daybreak+'-'+nightfall+'] (Avg='+str(averageNightsSleep)+'hrs)')
+
+    ax.grid(True)
+
+    plt.xlabel('24-hour period beginning',fontweight='bold')
+    plt.ylabel('Hours duration of longest continuous sleep during',fontweight='bold')
+    plt.title('Longest continuous period of sleep during night and day, by date',fontweight='bold')
+    plt.xticks(index + bar_width, dates)
+
+    plt.legend()
+
+
+    plt.setp(ax.get_xticklabels(), rotation=45, horizontalalignment='right')
+
+    plt.tight_layout()
+
+    # Saves to file 
+    plt.savefig('longestContinuousSleepNightAndDayBarchart.pdf')
+    plt.savefig('longestContinuousSleepNightAndDayBarchart.jpg')
+
+    plt.show()
 
 # Graph data using matplotlib visualization
-def plotBarChart(dataItemsList): 
-    colourChoices = ['b','r','g','y']
-    activityChoices = ['Sleeping','Feeding']
+def plotDayNightHoursSleptBarChart(dataItemsList): 
 
     # Data to plot
     n_groups = len(dataItemsList)
@@ -101,10 +176,12 @@ def plotBarChart(dataItemsList):
         timeSleptDuringDay.append(item.sleptDaySeconds/secHourConversion)
         timeSleptDuringNight.append(item.sleptNightSeconds/secHourConversion)
         timeSleptDuringNightAndDay.append((item.sleptDaySeconds+item.sleptNightSeconds)/secHourConversion)
-        dates.append(item.startDate)
+        #dates.append(item.startDate)
+        dates.append((item.starts).strftime("%A, %d %B %Y %H:%M"))
+    
 
     # Create plot
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(20,10))
     index = np.arange(n_groups)
     bar_width = 0.25
     opacity = 0.8
@@ -127,15 +204,21 @@ def plotBarChart(dataItemsList):
 
     ax.grid(True)
 
-    plt.xlabel('Date')
-    plt.ylabel('Hours Slept During')
-    plt.title('Hours slept during night and day, by date')
+    plt.xlabel('24-hour period beginning',fontweight='bold')
+    plt.ylabel('Hours Slept During',fontweight='bold')
+    plt.title('Hours slept during night and day, by date',fontweight='bold')
     plt.xticks(index + bar_width, dates)
     plt.legend()
 
     plt.setp(ax.get_xticklabels(), rotation=45, horizontalalignment='right')
 
     plt.tight_layout()
+
+
+    # Saves to file 
+    plt.savefig('hoursSleptNightAndDayBarchart.pdf')
+    plt.savefig('hoursSleptNightAndDayBarchart.jpg')
+
     plt.show()
 #
 #    # Set up an invisible background scatterplot give graph the correct size
