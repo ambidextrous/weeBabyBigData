@@ -74,7 +74,7 @@ def analyseData(activitiesList,maxDate,minDate):
 
     dataItemsDict = setLongestSleepDayAndNight(dataItemsDict)
 
-    dataItemsDict = getMedianSleepDayAndNight(dataItemsDict)
+    dataItemsDict = getmeanSleepDayAndNight(dataItemsDict)
 
     testPrintSpecificItemKey(dataItemsDict,"2017-03-13")
     testPrintSpecificItemKey(dataItemsDict,"2017-03-14")
@@ -85,6 +85,66 @@ def analyseData(activitiesList,maxDate,minDate):
     plotDayNightHoursSleptBarChart(dataItemsDateOrderedList)
 
     plotDayNightLongestContinuousSleepBarChart(dataItemsDateOrderedList)
+
+    plotDayMeanTimeSleepBarChart(dataItemsDateOrderedList)
+
+def plotDayMeanTimeSleepBarChart(dataItemsList):
+    
+    # Data to plot
+    n_groups = len(dataItemsList)
+    meanDaySleepTimes = []
+    dates = []
+
+    secHourConversion = 60 * 60
+
+    for item in dataItemsList:
+        # Adds mean day sleep time
+        if item.startDate == '2017-03-21':
+            meanDaySleepTimes.append(0)
+            print "item.startDate = "+str(item.startDate)
+        else:
+            meanDaySleepTimes.append(item.meanSleepDaySecsSinceDaybreak/secHourConversion)
+        #print "item.meanSleepDaySecsSinceDaybreak = "+str(item.meanSleepDaySecsSinceDaybreak)
+        #print "item.meanSleepDaySecsSinceDaybreak = "+str(item.meanSleepDaySecsSinceDaybreak)
+        # Adds date
+        dates.append((item.starts).strftime("%A, %d %B %Y %H:%M"))
+
+    # Create plot
+    fig, ax = plt.subplots(figsize=(20,10))
+    index = np.arange(n_groups)
+    bar_width = 0.35
+    opacity = 0.8
+
+    #averageDaysSleep = round(sum(longestTimesSleptDuringDay)/len(longestTimesSleptDuringDay),2)
+
+    item = dataItemsList[0]
+    daybreak = item.starts.strftime("%H:%M")
+    nightfall = item.nightfall.strftime("%H:%M")
+    nightsEnd = item.ends.strftime("%H:%M")
+
+    rects1 = plt.bar(index,meanDaySleepTimes, bar_width,
+                    alpha=opacity,
+                    color='b',
+                    label='Day [Period='+'-'+'] (Avg='+str()+'hrs)')
+
+    ax.grid(True)
+
+    plt.xlabel('24-hour period beginning',fontweight='bold')
+    plt.ylabel('Hours duration of longest continuous sleep during',fontweight='bold')
+    plt.title('Longest continuous period of sleep during night and day, by date',fontweight='bold')
+    plt.xticks(index + bar_width, dates)
+
+    plt.legend()
+
+    plt.setp(ax.get_xticklabels(), rotation=45, horizontalalignment='right')
+
+    plt.tight_layout()
+
+    # Saves to file 
+    plt.savefig('meanDaySleeptimeBarchart.pdf')
+    plt.savefig('meanDaySleeptimeBarchart.jpg')
+
+    plt.show()
 
 def plotDayNightLongestContinuousSleepBarChart(dataItemsList):
     
@@ -148,7 +208,6 @@ def plotDayNightLongestContinuousSleepBarChart(dataItemsList):
     plt.xticks(index + bar_width, dates)
 
     plt.legend()
-
 
     plt.setp(ax.get_xticklabels(), rotation=45, horizontalalignment='right')
 
@@ -293,11 +352,11 @@ def plotDayNightHoursSleptBarChart(dataItemsList):
 #    # Shows file onscreen
 #    plt.show()
 #
-def getMedianSleepDayAndNight(dataItemsDict):
+def getmeanSleepDayAndNight(dataItemsDict):
     epoch = dt.datetime.utcfromtimestamp(0)
     for key in dataItemsDict:
         item = dataItemsDict[key]
-        # Calculates median night sleep time
+        # Calculates mean night sleep time
         nightActivities = item.nightActivities
         minutesSleeping = []
         currentMinute = item.nightfall
@@ -311,11 +370,11 @@ def getMedianSleepDayAndNight(dataItemsDict):
             totalMinutesSleeping += (minute-epoch).total_seconds()
         # Avoid dividing by zero
         if len(minutesSleeping) > 0:
-            item.medianSleepTimeNight = totalMinutesSleeping / len(minutesSleeping)
+            item.meanSleepTimeNight = totalMinutesSleeping / len(minutesSleeping)
         else:
-            item.medianSleepTimeNight = 0
-        item.medianSleepNightSecsSinceNightfall = item.medianSleepTimeNight-(item.nightfall-epoch).total_seconds()
-        # Calculates median day sleep time
+            item.meanSleepTimeNight = 0
+        item.meanSleepNightSecsSinceNightfall = item.meanSleepTimeNight-(item.nightfall-epoch).total_seconds()
+        # Calculates mean day sleep time
         dayActivities = item.dayActivities
         minutesSleeping = []
         currentMinute = item.starts
@@ -329,10 +388,10 @@ def getMedianSleepDayAndNight(dataItemsDict):
             totalMinutesSleeping += (minute-epoch).total_seconds()
         # Avoid dividing by zero
         if len(minutesSleeping) > 0:
-            item.medianSleepTimeDay = totalMinutesSleeping / len(minutesSleeping)
+            item.meanSleepTimeDay = totalMinutesSleeping / len(minutesSleeping)
         else:
-            item.medianSleepTimeDay = 0
-        item.medianSleepDaySecsSinceDaybreak = item.medianSleepTimeDay-(item.starts-epoch).total_seconds()
+            item.meanSleepTimeDay = 0
+        item.meanSleepDaySecsSinceDaybreak = item.meanSleepTimeDay-(item.starts-epoch).total_seconds()
     return dataItemsDict
 
 def setLongestSleepDayAndNight(dataItemsDict):
@@ -376,12 +435,12 @@ def testPrintSpecificItemKey(dataItemsDict,key):
     print "slept day H:M:S = "+str(dt.timedelta(seconds=dataItemsDict[key].sleptDaySeconds))
     print "longestSleepNight = "+convertSecondsToHMS(dataItemsDict[key].longestNightSleepSecs)
     print "longestSleepDay = "+convertSecondsToHMS(dataItemsDict[key].longestDaySleepSecs)
-    print "medianSleepTimeNight = "+str(dataItemsDict[key].medianSleepTimeNight)
-    print "medianSleepTimeNight = "+str(dt.datetime.fromtimestamp(dataItemsDict[key].medianSleepTimeNight).strftime('%c'))
-    print "medianSleepNightSecsSinceNightfall = "+str(dataItemsDict[key].medianSleepNightSecsSinceNightfall)
-    print "medianSleepTimeDay = "+str(dataItemsDict[key].medianSleepTimeDay)
-    print "medianSleepTimeDay = "+str(dt.datetime.fromtimestamp(dataItemsDict[key].medianSleepTimeDay).strftime('%c'))
-    print "medianSleepDaySecsSinceDaybreak = "+str(dataItemsDict[key].medianSleepDaySecsSinceDaybreak)
+    print "meanSleepTimeNight = "+str(dataItemsDict[key].meanSleepTimeNight)
+    print "meanSleepTimeNight = "+str(dt.datetime.fromtimestamp(dataItemsDict[key].meanSleepTimeNight).strftime('%c'))
+    print "meanSleepNightSecsSinceNightfall = "+str(dataItemsDict[key].meanSleepNightSecsSinceNightfall)
+    print "meanSleepTimeDay = "+str(dataItemsDict[key].meanSleepTimeDay)
+    print "meanSleepTimeDay = "+str(dt.datetime.fromtimestamp(dataItemsDict[key].meanSleepTimeDay).strftime('%c'))
+    print "meanSleepDaySecsSinceDaybreak = "+str(dataItemsDict[key].meanSleepDaySecsSinceDaybreak)
     print "nightActivities"
     for item in dataItemsDict[key].nightActivities:
         print item
@@ -484,10 +543,10 @@ class dataItem(object):
         self.goodNightsSleepScore = 1.0
         self.longestNightSleepSecs = 1.0
         self.longestDaySleepSecs = 1.0
-        self.medianSleepTimeNight = 0
-        self.medianSleepTimeDay = 0
-        self.medianSleepNightSecsSinceNightfall = 0
-        self.medianSleepDaySecsSinceDaybreak = 0
+        self.meanSleepTimeNight = 0
+        self.meanSleepTimeDay = 0
+        self.meanSleepNightSecsSinceNightfall = 0
+        self.meanSleepDaySecsSinceDaybreak = 0
         #print (self)
     def __str__(self):
         return "name:"+str(self.name)+"; startDate:"+str(self.startDate)+"; nightActivities:"+str(self.nightActivities)+"; dayActivities:"+str(self.dayActivities)+"; subperiods"+str(self.subperiods)+"; day:"+str(self.day)+"; night:"+str(self.night)+"; slept24HoursSeconds:"+str(self.slept24HoursSeconds)+"; sleptNightSeconds:"+str(self.sleptNightSeconds)+"; sleptDaySeconds:"+str(self.sleptDaySeconds)+"; avgNightSleepSeconds:"+str(self.avgNightSleepSeconds)+"; avgDaySleepSeconds:"+str(self.avgDaySleepSeconds)+"; goodNightsSleepScore:"+str(self.goodNightsSleepScore)
