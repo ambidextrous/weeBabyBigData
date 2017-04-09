@@ -80,11 +80,20 @@ def analyseData(activitiesList,maxDate,minDate):
 
     dataItemsDateOrderedList = removeMissingSleepDataItems(dataItemsDateOrderedList)
 
-    plotDayNightHoursSleptBarChart(dataItemsDateOrderedList)
+    dataItemsDateOrderedList = calculateValuesForAndPlotDayNightHoursSleptBarChart(dataItemsDateOrderedList)
 
-    plotDayNightLongestContinuousSleepBarChart(dataItemsDateOrderedList)
+    dataItemsDateOrderedList = calculateValuesForAndPlotDayNightLongestContinuousSleepBarChart(dataItemsDateOrderedList)
 
-    plotDayMeanTimeSleepBarChart(dataItemsDateOrderedList)
+    dataItemsDateOrderedList = calculateValuesForAndPlotDayMeanTimeSleepBarChart(dataItemsDateOrderedList)
+
+    writeSleepAnalysisDataToFile(dataItemsDateOrderedList)
+
+def writeSleepAnalysisDataToFile(dataItemsList):
+    with open('sleepAnalysisData.csv','wb') as csvfile:
+        w = csv.writer(csvfile)
+        w.writerow(['date','hoursSleptNight','hoursSleptDay','longestSleepHoursDay','longestSleepHourNight','meanSleepTimeDay'])
+        for item in dataItemsList:
+            w.writerow([str(item.startDate),str(item.hoursSleptDuringNight),str(item.hoursSleptDuringDay),str(item.longestDaySleepHours),str(item.longestNightSleepHours),str(item.meanSleepTimeDayHoursSinceMidnight)])
 
 # Removes dataItems with less than a minimum number of hours sleep for either the day or night periods from dataItemsList
 def removeMissingSleepDataItems(dataItemsList):
@@ -97,7 +106,7 @@ def removeMissingSleepDataItems(dataItemsList):
             listWithMissingItemsRemoved.append(item)
     return listWithMissingItemsRemoved
 
-def plotDayMeanTimeSleepBarChart(dataItemsList):
+def calculateValuesForAndPlotDayMeanTimeSleepBarChart(dataItemsList):
     
     # Data to plot
     n_groups = len(dataItemsList)
@@ -112,8 +121,8 @@ def plotDayMeanTimeSleepBarChart(dataItemsList):
     for item in dataItemsList:
         # Adds mean day sleep time
         meanDaySleepTimes.append((item.meanSleepDaySecsSinceDaybreak/secHourConversion)+hoursMidnightToDawn)
-        #print "item.meanSleepDaySecsSinceDaybreak = "+str(item.meanSleepDaySecsSinceDaybreak)
-        #print "item.meanSleepDaySecsSinceDaybreak = "+str(item.meanSleepDaySecsSinceDaybreak)
+        # Adds mean day sleep time to dataItem
+        item.meanSleepTimeDayHoursSinceMidnight = (item.meanSleepDaySecsSinceDaybreak/secHourConversion) + hoursMidnightToDawn
         # Adds date
         dates.append((item.starts).strftime("%A, %d %B %Y %H:%M"))
 
@@ -155,7 +164,9 @@ def plotDayMeanTimeSleepBarChart(dataItemsList):
 
     plt.show()
 
-def plotDayNightLongestContinuousSleepBarChart(dataItemsList):
+    return dataItemsList
+
+def calculateValuesForAndPlotDayNightLongestContinuousSleepBarChart(dataItemsList):
     
     # Data to plot
     n_groups = len(dataItemsList)
@@ -172,12 +183,16 @@ def plotDayNightLongestContinuousSleepBarChart(dataItemsList):
             if activity.name == "sleeping" and (activity.ends - activity.begins).total_seconds() > longestSleep:
                 longestSleep = (activity.ends - activity.begins).total_seconds()
         longestTimesSleptDuringNight.append(longestSleep/secHourConversion)
+        # Adds longest time slept each night to dataItem
+        item.longestNightSleepHours = longestSleep/secHourConversion
         # Adds longest time slept each day
         longestSleep = dt.timedelta(days=0).total_seconds()
         for activity in item.dayActivities:
             if activity.name == "sleeping" and (activity.ends - activity.begins).total_seconds() > longestSleep:
                 longestSleep = (activity.ends - activity.begins).total_seconds()
         longestTimesSleptDuringDay.append(longestSleep/secHourConversion)
+        # Adds longest time slept each day to dataItem
+        item.longestDaySleepHours = longestSleep/secHourConversion
         # Adds date
         dates.append((item.starts).strftime("%A, %d %B %Y %H:%M"))
 
@@ -228,8 +243,10 @@ def plotDayNightLongestContinuousSleepBarChart(dataItemsList):
 
     plt.show()
 
+    return dataItemsList
+
 # Graph data using matplotlib visualization
-def plotDayNightHoursSleptBarChart(dataItemsList): 
+def calculateValuesForAndPlotDayNightHoursSleptBarChart(dataItemsList): 
 
     # Data to plot
     n_groups = len(dataItemsList)
@@ -242,8 +259,11 @@ def plotDayNightHoursSleptBarChart(dataItemsList):
 
     for item in dataItemsList:
         timeSleptDuringDay.append(item.sleptDaySeconds/secHourConversion)
+        item.hoursSleptDuringDay = item.sleptDaySeconds/secHourConversion
         timeSleptDuringNight.append(item.sleptNightSeconds/secHourConversion)
+        item.hoursSleptDuringNight = item.sleptNightSeconds/secHourConversion
         timeSleptDuringNightAndDay.append((item.sleptDaySeconds+item.sleptNightSeconds)/secHourConversion)
+        item.hoursSleptDuring24Hours = (item.sleptDaySeconds+item.sleptNightSeconds) / secHourConversion 
         #dates.append(item.startDate)
         dates.append((item.starts).strftime("%A, %d %B %Y %H:%M"))
     
@@ -282,12 +302,14 @@ def plotDayNightHoursSleptBarChart(dataItemsList):
 
     plt.tight_layout()
 
-
     # Saves to file 
     plt.savefig('hoursSleptNightAndDayBarchart.pdf')
     plt.savefig('hoursSleptNightAndDayBarchart.jpg')
 
     plt.show()
+
+    return dataItemsList
+
 #
 #    # Set up an invisible background scatterplot give graph the correct size
 #    # Make a series of events that are one day apart 
@@ -556,6 +578,11 @@ class dataItem(object):
         self.meanSleepTimeDay = 0
         self.meanSleepNightSecsSinceNightfall = 0
         self.meanSleepDaySecsSinceDaybreak = 0
+        self.hoursSleptDuringNight = 0
+        self.hoursSleptDuringDay = 0
+        self.longestDaySleepHours = 0
+        self.longestNightSleepHours = 0
+        self.meanSleepTimeDayHoursSinceMidnight = 0
         #print (self)
     def __str__(self):
         return "name:"+str(self.name)+"; startDate:"+str(self.startDate)+"; nightActivities:"+str(self.nightActivities)+"; dayActivities:"+str(self.dayActivities)+"; subperiods"+str(self.subperiods)+"; day:"+str(self.day)+"; night:"+str(self.night)+"; slept24HoursSeconds:"+str(self.slept24HoursSeconds)+"; sleptNightSeconds:"+str(self.sleptNightSeconds)+"; sleptDaySeconds:"+str(self.sleptDaySeconds)+"; avgNightSleepSeconds:"+str(self.avgNightSleepSeconds)+"; avgDaySleepSeconds:"+str(self.avgDaySleepSeconds)+"; goodNightsSleepScore:"+str(self.goodNightsSleepScore)
