@@ -55,7 +55,6 @@ def analyseData(activitiesList,maxDate,minDate):
         dataItemsDict[item.startDate] = item
         dataItemsDateOrderedList.append(item)
 
-
     # Creates a dictionary of activity objects, with start date keys and of the form "2019-01-27" and values containing lists of activityInstance values
     activityInstancesDict = {}
     for activity in activitiesList:
@@ -87,6 +86,7 @@ def analyseData(activitiesList,maxDate,minDate):
 
     plotDayMeanTimeSleepBarChart(dataItemsDateOrderedList)
 
+# Removes dataItems with less than a minimum number of hours sleep for either the day or night periods from dataItemsList
 def removeMissingSleepDataItems(dataItemsList):
     listWithMissingItemsRemoved = []
     minDayHoursSleepThreshhold = 1
@@ -106,13 +106,12 @@ def plotDayMeanTimeSleepBarChart(dataItemsList):
 
     secHourConversion = 60 * 60
 
+    firstItem = dataItemsList[0]
+    hoursMidnightToDawn = int(firstItem.starts.strftime("%H"))
+
     for item in dataItemsList:
         # Adds mean day sleep time
-        if item.startDate == '2017-03-21':
-            meanDaySleepTimes.append(0)
-            print "item.startDate = "+str(item.startDate)
-        else:
-            meanDaySleepTimes.append(item.meanSleepDaySecsSinceDaybreak/secHourConversion)
+        meanDaySleepTimes.append((item.meanSleepDaySecsSinceDaybreak/secHourConversion)+hoursMidnightToDawn)
         #print "item.meanSleepDaySecsSinceDaybreak = "+str(item.meanSleepDaySecsSinceDaybreak)
         #print "item.meanSleepDaySecsSinceDaybreak = "+str(item.meanSleepDaySecsSinceDaybreak)
         # Adds date
@@ -130,17 +129,18 @@ def plotDayMeanTimeSleepBarChart(dataItemsList):
     daybreak = item.starts.strftime("%H:%M")
     nightfall = item.nightfall.strftime("%H:%M")
     nightsEnd = item.ends.strftime("%H:%M")
+    avgSleepTime = round(sum(meanDaySleepTimes)/len(meanDaySleepTimes),2)
 
     rects1 = plt.bar(index,meanDaySleepTimes, bar_width,
                     alpha=opacity,
                     color='b',
-                    label='Day [Period='+'-'+'] (Avg='+str()+'hrs)')
+                    label='Day [Period='+daybreak+'-'+nightfall+'] (Avg='+str(avgSleepTime)+'hrs after mid-night)')
 
     ax.grid(True)
 
     plt.xlabel('24-hour period beginning',fontweight='bold')
-    plt.ylabel('Hours duration of longest continuous sleep during',fontweight='bold')
-    plt.title('Longest continuous period of sleep during night and day, by date',fontweight='bold')
+    plt.ylabel('Mean sleep time during daytime period, hours since mid-night \n (Earlier = slept longer in morning; later = slept more in afternoon)',fontweight='bold')
+    plt.title('Mean sleep time during day',fontweight='bold')
     plt.xticks(index + bar_width, dates)
 
     plt.legend()
