@@ -620,7 +620,7 @@ def getMaxAndMinDates(analysisDataList):
     return latestDate, earliestDate
 
 def go():
-    dataFiles = ['sleepDataStartingMarch22.csv']#,'feedingDataStartingMarch22.csv']
+    dataFiles = ['sleepingData.csv']#,'feedingData.csv']
     activityTypes = ['sleeping','feeding']
     listOfInputLists = []
     for i in range(len(dataFiles)):
