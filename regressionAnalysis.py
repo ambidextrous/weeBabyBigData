@@ -6,8 +6,11 @@ import datetime as dt
 import csv
 import sys
 import time
+import pandas
 import copy
-from pylab import figtext
+from scipy import stats
+from pylab import figtext, plot, show
+from statsmodels.formula.api import ols
 from matplotlib.backends.backend_pdf import PdfPages
 
 def analyseData(activitiesList,maxDate,minDate):
@@ -87,6 +90,41 @@ def analyseData(activitiesList,maxDate,minDate):
     dataItemsDateOrderedList = calculateValuesForAndPlotDayMeanTimeSleepBarChart(dataItemsDateOrderedList)
 
     writeSleepAnalysisDataToFile(dataItemsDateOrderedList)
+
+    regress(dataItemsDateOrderedList)
+
+    regressNumpy(dataItemsDateOrderedList)
+
+def regressNumpy(dataItemsList):
+    hoursSleptNight = []
+    hoursSleptDay = []
+    for item in dataItemsList:
+        hoursSleptNight.append(item.hoursSleptDuringNight)
+        hoursSleptDay.append(item.hoursSleptDuringDay)
+    slope, intercept, r_value, p_value, std_err = stats.linregress(hoursSleptNight,hoursSleptDay)
+    print 'r_value', r_value
+    print 'p_value', p_value
+    print 'standard deviation', std_err
+
+    line = slope*hoursSleptNight+intercept
+    plot(hoursSleptNight, '-r', hoursSleptNight, hoursSleptDay, 'o')
+    show()
+
+def regress(dataItems):
+    df = pandas.read_csv('sleepAnalysisData.csv')
+    print df
+    df1 = df[['hoursSleptNight','hoursSleptDay']]
+    print df1
+    model = ols('hoursSleptNight ~ hoursSleptDay', df1).fit()
+    print model.summary()
+    df2 = df[['hoursSleptNight', 'meanSleepTimeDay']]
+    model2 = ols('hoursSleptNight ~ meanSleepTimeDay', df2).fit()
+    print model2.summary()
+    df3 = df[['hoursSleptNight','longestSleepHoursDay']]
+    model3 = ols('hoursSleptNight ~ longestSleepHoursDay', df3).fit()
+    print model3.summary()
+
+    
 
 def writeSleepAnalysisDataToFile(dataItemsList):
     with open('sleepAnalysisData.csv','wb') as csvfile:
