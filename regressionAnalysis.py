@@ -76,17 +76,26 @@ def analyseData(activitiesList,maxDate,minDate):
 
     dataItemsDict = getmeanSleepDayAndNight(dataItemsDict)
 
-    testPrintSpecificItemKey(dataItemsDict,"2017-03-13")
-    testPrintSpecificItemKey(dataItemsDict,"2017-03-14")
+    #testPrintSpecificItemKey(dataItemsDict,"2017-03-13")
+    #testPrintSpecificItemKey(dataItemsDict,"2017-03-14")
 
-    for item in dataItemsDateOrderedList:
-        print "date = "+str(item.startDate)
+    dataItemsDateOrderedList = removeMissingSleepDataItems(dataItemsDateOrderedList)
 
     plotDayNightHoursSleptBarChart(dataItemsDateOrderedList)
 
     plotDayNightLongestContinuousSleepBarChart(dataItemsDateOrderedList)
 
     plotDayMeanTimeSleepBarChart(dataItemsDateOrderedList)
+
+def removeMissingSleepDataItems(dataItemsList):
+    listWithMissingItemsRemoved = []
+    minDayHoursSleepThreshhold = 1
+    minNightHoursSleepThreshhold = 1
+    secHourConversion = 60 * 60
+    for item in dataItemsList:
+        if (item.sleptDaySeconds/secHourConversion) >= minDayHoursSleepThreshhold and (item.sleptNightSeconds/secHourConversion) >= minNightHoursSleepThreshhold:
+            listWithMissingItemsRemoved.append(item)
+    return listWithMissingItemsRemoved
 
 def plotDayMeanTimeSleepBarChart(dataItemsList):
     
@@ -602,7 +611,7 @@ def formatDataForAnalysis(listOfInputLists):
     for i in range(len(listOfInputLists)):
         for j in range(1,len(listOfInputLists[i])):
             nextActivityInstance = activityInstance(listOfInputLists[i][j])
-            print "nextActivityInstance = "+str(nextActivityInstance)
+            #print "nextActivityInstance = "+str(nextActivityInstance)
             activities.append(nextActivityInstance)
     return activities
 
@@ -615,8 +624,8 @@ def getMaxAndMinDates(analysisDataList):
             earliestDate = item
         if item.ends > latestDate.ends:
             latestDate = item
-    print "earliestDate = "+str(earliestDate)
-    print "latestDate = "+str(latestDate)
+    #print "earliestDate = "+str(earliestDate)
+    #print "latestDate = "+str(latestDate)
     return latestDate, earliestDate
 
 def go():
