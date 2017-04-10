@@ -24,7 +24,7 @@ def plotData(data,maxDate,minDate):
     # int used so that y-axis starts at midnight
     times = x % 1 + int(x[0])
     
-    fig = plt.figure()
+    fig = plt.figure(figsize=(20,10))
     fig.set_size_inches(11.69,8.27)
     fig.suptitle('Daily Activity Patterns', fontsize=14, fontweight='bold')
     ax = fig.add_subplot(111)

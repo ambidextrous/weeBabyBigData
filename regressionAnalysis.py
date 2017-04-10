@@ -129,7 +129,9 @@ def regress(dataItems):
 def writeSleepAnalysisDataToFile(dataItemsList):
     with open('sleepAnalysisData.csv','wb') as csvfile:
         w = csv.writer(csvfile)
+        # Write name rows header
         w.writerow(['date','hoursSleptNight','hoursSleptDay','longestSleepHoursDay','longestSleepHourNight','meanSleepTimeDay'])
+        # Write data rows
         for item in dataItemsList:
             w.writerow([str(item.startDate),str(item.hoursSleptDuringNight),str(item.hoursSleptDuringDay),str(item.longestDaySleepHours),str(item.longestNightSleepHours),str(item.meanSleepTimeDayHoursSinceMidnight)])
 
