@@ -91,9 +91,9 @@ def analyseData(activitiesList,maxDate,minDate):
 
     writeSleepAnalysisDataToFile(dataItemsDateOrderedList)
 
-    regress(dataItemsDateOrderedList)
+    #regress(dataItemsDateOrderedList)
 
-    regressNumpy(dataItemsDateOrderedList)
+    #regressNumpy(dataItemsDateOrderedList)
 
 def regressNumpy(dataItemsList):
     hoursSleptNight = []
@@ -180,17 +180,20 @@ def calculateValuesForAndPlotDayMeanTimeSleepBarChart(dataItemsList):
     nightsEnd = item.ends.strftime("%H:%M")
     avgSleepTime = round(sum(meanDaySleepTimes)/len(meanDaySleepTimes),2)
 
-    rects1 = plt.bar(index,meanDaySleepTimes, bar_width,
-                    alpha=opacity,
-                    color='b',
-                    label='Day [Period='+daybreak+'-'+nightfall+'] (Avg='+str(avgSleepTime)+'hrs after mid-night)')
+#    rects1 = plt.bar(index,meanDaySleepTimes, bar_width,
+#                    alpha=opacity,
+#                    color='b',
+#                    label='Day [Period='+daybreak+'-'+nightfall+'] (Avg='+str(avgSleepTime)+'hrs after mid-night)')
+#
+    plt.plot(index,meanDaySleepTimes)
 
     ax.grid(True)
 
     plt.xlabel('24-hour period beginning',fontweight='bold')
     plt.ylabel('Mean sleep time during daytime period, hours since mid-night \n (Earlier = slept longer in morning; later = slept more in afternoon)',fontweight='bold')
     plt.title('Mean sleep time during day',fontweight='bold')
-    plt.xticks(index + bar_width, dates)
+    #plt.xticks(index + bar_width, dates)
+    plt.xticks(index, dates)
 
     plt.legend()
 
