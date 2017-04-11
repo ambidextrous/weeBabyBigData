@@ -33,7 +33,7 @@ Hours slept night and day graph:
 
 Longest continuous sleep night and day graph:
 
-![Longest continuous sleep night and day](https://github.com/ambidextrous/timeLogGrapher/blob/master/longestContinuousSleepNightAndDayBarchart.jpg "Longest continuous sleep night and day")
+![Longest continuous sleep night and day](https://github.com/ambidextrous/timeLogGrapher/blob/master/meanDaySleeptimeBarchart.jpg "Longest continuous sleep night and day")
 
 Mean day sleep time graph:
 
