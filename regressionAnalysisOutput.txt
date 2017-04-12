@@ -1,0 +1,27 @@
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:        hoursSleptNight   R-squared:                       0.276
+Model:                            OLS   Adj. R-squared:                  0.193
+Method:                 Least Squares   F-statistic:                     3.309
+Date:                Wed, 12 Apr 2017   Prob (F-statistic):             0.0357
+Time:                        17:08:01   Log-Likelihood:                -30.852
+No. Observations:                  30   AIC:                             69.70
+Df Residuals:                      26   BIC:                             75.31
+Df Model:                           3                                         
+Covariance Type:            nonrobust                                         
+========================================================================================
+                           coef    std err          t      P>|t|      [95.0% Conf. Int.]
+----------------------------------------------------------------------------------------
+Intercept                9.7911      1.708      5.732      0.000         6.280    13.302
+hoursSleptDay            0.1582      0.145      1.088      0.287        -0.141     0.457
+longestSleepHoursDay    -0.7681      0.314     -2.443      0.022        -1.414    -0.122
+meanSleepTimeDay        -0.2576      0.120     -2.149      0.041        -0.504    -0.011
+==============================================================================
+Omnibus:                        3.877   Durbin-Watson:                   0.597
+Prob(Omnibus):                  0.144   Jarque-Bera (JB):                1.568
+Skew:                           0.066   Prob(JB):                        0.457
+Kurtosis:                       1.888   Cond. No.                         179.
+==============================================================================
+
+Warnings:
+[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.

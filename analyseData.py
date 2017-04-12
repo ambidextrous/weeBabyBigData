@@ -13,6 +13,7 @@ from pylab import figtext, plot, show
 from statsmodels.formula.api import ols
 from matplotlib.backends.backend_pdf import PdfPages
 
+# Analyses activity and time-use data and produces visualisations thereof
 def analyseData(activitiesList,maxDate,minDate):
     
     dayLengthHours = 24
@@ -78,54 +79,28 @@ def analyseData(activitiesList,maxDate,minDate):
 
     dataItemsDict = getmeanSleepDayAndNight(dataItemsDict)
 
-    #testPrintSpecificItemKey(dataItemsDict,"2017-03-13")
-    #testPrintSpecificItemKey(dataItemsDict,"2017-03-14")
-
     dataItemsDateOrderedList = removeMissingSleepDataItems(dataItemsDateOrderedList)
 
     dataItemsDateOrderedList = calculateValuesForAndPlotDayNightHoursSleptBarChart(dataItemsDateOrderedList)
 
     dataItemsDateOrderedList = calculateValuesForAndPlotDayNightLongestContinuousSleepBarChart(dataItemsDateOrderedList)
 
-    dataItemsDateOrderedList = calculateValuesForAndPlotDayMeanTimeSleepBarChart(dataItemsDateOrderedList)
+    dataItemsDateOrderedList = calculateValuesForAndPlotDayMeanTimeSleepLineGraph(dataItemsDateOrderedList)
 
     writeSleepAnalysisDataToFile(dataItemsDateOrderedList)
 
-    #regress(dataItemsDateOrderedList)
+    regress(dataItemsDateOrderedList)
 
-    #regressNumpy(dataItemsDateOrderedList)
-
-def regressNumpy(dataItemsList):
-    hoursSleptNight = []
-    hoursSleptDay = []
-    for item in dataItemsList:
-        hoursSleptNight.append(item.hoursSleptDuringNight)
-        hoursSleptDay.append(item.hoursSleptDuringDay)
-    slope, intercept, r_value, p_value, std_err = stats.linregress(hoursSleptNight,hoursSleptDay)
-    print 'r_value', r_value
-    print 'p_value', p_value
-    print 'standard deviation', std_err
-
-    line = slope*hoursSleptNight+intercept
-    plot(hoursSleptNight, '-r', hoursSleptNight, hoursSleptDay, 'o')
-    show()
-
+# Carries out regression analysis of data, prints to command line and writes to file
 def regress(dataItems):
     df = pandas.read_csv('sleepAnalysisData.csv')
-    print df
-    df1 = df[['hoursSleptNight','hoursSleptDay']]
-    print df1
-    model = ols('hoursSleptNight ~ hoursSleptDay', df1).fit()
+    model = ols('hoursSleptNight ~ hoursSleptDay + longestSleepHoursDay + meanSleepTimeDay', df).fit()
     print model.summary()
-    df2 = df[['hoursSleptNight', 'meanSleepTimeDay']]
-    model2 = ols('hoursSleptNight ~ meanSleepTimeDay', df2).fit()
-    print model2.summary()
-    df3 = df[['hoursSleptNight','longestSleepHoursDay']]
-    model3 = ols('hoursSleptNight ~ longestSleepHoursDay', df3).fit()
-    print model3.summary()
+    textFile = open("regressionAnalysisOutput.txt","w")
+    textFile.write(str(model.summary()))
+    textFile.close()
 
-    
-
+# Writes sleep analysis data to a .csv file
 def writeSleepAnalysisDataToFile(dataItemsList):
     with open('sleepAnalysisData.csv','wb') as csvfile:
         w = csv.writer(csvfile)
@@ -146,7 +121,8 @@ def removeMissingSleepDataItems(dataItemsList):
             listWithMissingItemsRemoved.append(item)
     return listWithMissingItemsRemoved
 
-def calculateValuesForAndPlotDayMeanTimeSleepBarChart(dataItemsList):
+# Calculates mean sleep time values for each day, adds them to data items, saves them to file and shows them on-screen
+def calculateValuesForAndPlotDayMeanTimeSleepLineGraph(dataItemsList):
     
     # Data to plot
     n_groups = len(dataItemsList)
@@ -172,27 +148,22 @@ def calculateValuesForAndPlotDayMeanTimeSleepBarChart(dataItemsList):
     bar_width = 0.35
     opacity = 0.8
 
-    #averageDaysSleep = round(sum(longestTimesSleptDuringDay)/len(longestTimesSleptDuringDay),2)
-
     item = dataItemsList[0]
     daybreak = item.starts.strftime("%H:%M")
     nightfall = item.nightfall.strftime("%H:%M")
     nightsEnd = item.ends.strftime("%H:%M")
     avgSleepTime = round(sum(meanDaySleepTimes)/len(meanDaySleepTimes),2)
 
-#    rects1 = plt.bar(index,meanDaySleepTimes, bar_width,
-#                    alpha=opacity,
-#                    color='b',
-#                    label='Day [Period='+daybreak+'-'+nightfall+'] (Avg='+str(avgSleepTime)+'hrs after mid-night)')
-#
-    plt.plot(index,meanDaySleepTimes)
+
+    ax.axhline(y=avgSleepTime,linewidth=1,alpha=0.5,ls='dashed')
+
+    plt.plot(index,meanDaySleepTimes,label='Mean day-time sleep time [Avg='+str(avgSleepTime)+']',linewidth=4)
 
     ax.grid(True)
 
     plt.xlabel('24-hour period beginning',fontweight='bold')
     plt.ylabel('Mean sleep time during daytime period, hours since mid-night \n (Earlier = slept longer in morning; later = slept more in afternoon)',fontweight='bold')
     plt.title('Mean sleep time during day',fontweight='bold')
-    #plt.xticks(index + bar_width, dates)
     plt.xticks(index, dates)
 
     plt.legend()
@@ -202,13 +173,14 @@ def calculateValuesForAndPlotDayMeanTimeSleepBarChart(dataItemsList):
     plt.tight_layout()
 
     # Saves to file 
-    plt.savefig('meanDaySleeptimeBarchart.pdf')
-    plt.savefig('meanDaySleeptimeBarchart.jpg')
+    plt.savefig('meanDaySleeptimeLineGraph.pdf')
+    plt.savefig('meanDaySleeptimeLineGraph.jpg')
 
     plt.show()
 
     return dataItemsList
 
+# Calculates longest continues sleep time values for each night, day and twenty-four hour period, adds them to data items, saves them to file and shows them on-screen
 def calculateValuesForAndPlotDayNightLongestContinuousSleepBarChart(dataItemsList):
     
     # Data to plot
@@ -251,6 +223,10 @@ def calculateValuesForAndPlotDayNightLongestContinuousSleepBarChart(dataItemsLis
     averageNightsSleep = round(sum(longestTimesSleptDuringNight)/len(longestTimesSleptDuringNight),2)
     averageDaysSleep = round(sum(longestTimesSleptDuringDay)/len(longestTimesSleptDuringDay),2)
 
+
+    ax.axhline(y=averageNightsSleep,linewidth=1,color=nightColour,alpha=0.5,ls='dashed')
+    ax.axhline(y=averageDaysSleep,linewidth=1,color=dayColour,alpha=0.5,ls='dashed')
+
     item = dataItemsList[0]
     daybreak = item.starts.strftime("%H:%M")
     nightfall = item.nightfall.strftime("%H:%M")
@@ -266,6 +242,7 @@ def calculateValuesForAndPlotDayNightLongestContinuousSleepBarChart(dataItemsLis
                     alpha=opacity,
                     color=nightColour,
                     label='Night [Period='+daybreak+'-'+nightfall+'] (Avg='+str(averageNightsSleep)+'hrs)')
+
 
     ax.grid(True)
 
@@ -288,7 +265,7 @@ def calculateValuesForAndPlotDayNightLongestContinuousSleepBarChart(dataItemsLis
 
     return dataItemsList
 
-# Graph data using matplotlib visualization
+# Calculates total hours slept values for each day and night, adds them to data items, saves them to file and shows them on-screen
 def calculateValuesForAndPlotDayNightHoursSleptBarChart(dataItemsList): 
 
     # Data to plot
@@ -311,27 +288,39 @@ def calculateValuesForAndPlotDayNightHoursSleptBarChart(dataItemsList):
         dates.append((item.starts).strftime("%A, %d %B %Y %H:%M"))
     
 
+    dayAvg = round(sum(timeSleptDuringDay)/len(timeSleptDuringDay),2)
+    nightAvg = round(sum(timeSleptDuringNight)/len(timeSleptDuringNight),2)
+    twentyFourHourAvg = round((sum(timeSleptDuringDay)+sum(timeSleptDuringNight))/len(timeSleptDuringDay),2)
+
+    dayColour = 'b'
+    nightColour = 'r'
+    twentyFourHourColour = 'k'
+
     # Create plot
     fig, ax = plt.subplots(figsize=(20,10))
     index = np.arange(n_groups)
     bar_width = 0.25
     opacity = 0.8
 
+    ax.axhline(y=dayAvg,linewidth=1,color=dayColour,alpha=0.5,ls='dashed')
+    ax.axhline(y=nightAvg,linewidth=1,color=nightColour,alpha=0.5,ls='dashed')
+    ax.axhline(y=twentyFourHourAvg,linewidth=1,color=twentyFourHourColour,alpha=0.5,ls='dashed')
+
     rects1 = plt.bar(index,timeSleptDuringDay, bar_width,
                     alpha=opacity,
-                    color='b',
-                    label='Day')
+                    color=dayColour,
+                    label='Day [Avg='+str(dayAvg)+']')
 
 
     rects2 = plt.bar(index+bar_width,timeSleptDuringNight, bar_width,
                     alpha=opacity,
-                    color='r',
-                    label='Night')
+                    color=nightColour,
+                    label='Night [Avg='+str(nightAvg)+']')
     
     rects3 = plt.bar(index+(2*bar_width),timeSleptDuringNightAndDay, bar_width,
                     alpha=opacity,
-                    color='k',
-                    label='Night and Day')
+                    color=twentyFourHourColour,
+                    label='Night and Day [Avg='+str(twentyFourHourAvg)+']')
 
     ax.grid(True)
 
@@ -353,79 +342,7 @@ def calculateValuesForAndPlotDayNightHoursSleptBarChart(dataItemsList):
 
     return dataItemsList
 
-#
-#    # Set up an invisible background scatterplot give graph the correct size
-#    # Make a series of events that are one day apart 
-#    x = mpl.dates.drange(minDate,maxDate,dt.timedelta(days=1))
-#
-#    # Offset first event to top of graph to give correct height
-#    x[0] += 0.85
-#
-#    # Extract the time using a modulo 1, and adding an arbitrary base date
-#    # int used so that y-axis starts at midnight
-#    times = x % 1 + int(x[0])
-#    
-#    fig = plt.figure()
-#    fig.set_size_inches(11.69,8.27)
-#    fig.suptitle('Daily Activity Patterns', fontsize=14, fontweight='bold')
-#    ax = fig.add_subplot(111)
-#
-#    # Set background scatterplot to invisible 
-#    ax.plot_date(x, times, 'ro', color='w', visible=False)
-#    ax.yaxis_date()
-#    fig.autofmt_xdate()
-#    start, end = ax.get_ylim()
-#
-#    # Fix division sizes and labels to show hours on y-axis
-#    hourDivision = 1.0 / 24.0
-#    ax.yaxis.set_ticks(np.arange(start,end,hourDivision))
-#    ax.set_yticklabels(['Midnight','1am','2am','3am','4am','5am','6am','7am','8am','9am','10am','11am','Midday','1pm','2pm','3pm','4pm','5pm','6pm','7pm','8pm','9pm','10pm','11pm','Midnight'])
-#
-#    # Iterate through data 
-#    for i in range(0,len(data)):
-#
-#        # If period starts and finishes on different days, split and add to both days
-#        if data[i].startTime > data[i].stopTime:
-#            currentDataItem = data[i]
-#            currentDate = dt.datetime(currentDataItem.year,currentDataItem.month,currentDataItem.day)
-#            currentDate -= dt.timedelta(days=0.5)
-#            tomorrow = currentDate + dt.timedelta(days=1)
-#            plt.axvspan(xmin=currentDate, xmax=tomorrow, ymin=currentDataItem.startTime, ymax=1, facecolor=colourChoices[data[i].activityIndex], alpha=0.5)
-#            theDayAfterTomorrow = tomorrow + dt.timedelta(days=1)
-#            plt.axvspan(xmin=tomorrow, xmax=theDayAfterTomorrow, ymin=0, ymax=currentDataItem.stopTime, facecolor=colourChoices[data[i].activityIndex], alpha=0.5)
-#
-#        # Else, add to given day
-#        else:
-#            currentDataItem = data[i]
-#            currentDate = dt.datetime(currentDataItem.year,currentDataItem.month,currentDataItem.day)
-#            currentDate -= dt.timedelta(days=0.5)
-#            tomorrow = currentDate + dt.timedelta(days=1)
-#            plt.axvspan(xmin=currentDate, xmax=tomorrow, ymin=currentDataItem.startTime, ymax=currentDataItem.stopTime, facecolor=colourChoices[currentDataItem.activityIndex], alpha=0.5)
-#
-#    # Labels x and y axes
-#    ax.set_ylabel('Hours of day',fontweight='bold')
-#    ax.set_xlabel('Days: '+str(minDate.strftime("%A, %d %B %Y"))+' to '+str(maxDate.strftime("%A, %d %B %Y")),fontweight='bold')
-#
-#    ax.grid(True)
-#
-#    # Adds legend
-#    labels = []
-#    for i in range(len(activityChoices)):
-#        labels.append(patches.Patch(color=colourChoices[i], label=activityChoices[i], alpha=0.5))
-#    plt.legend(handles=labels)
-#
-#    # Ensures axis labels not cut off
-#    plt.tight_layout()
-#    # Ensures suptitle doesn't overlap graph
-#    plt.subplots_adjust(top=0.92)
-#
-#    # Saves to file
-#    plt.savefig('activityData.pdf')
-#    plt.savefig('activityData.jpg')
-#
-#    # Shows file onscreen
-#    plt.show()
-#
+# Calculates mean sleep time for day and night for each twentyFourHourPeriod and adds them to data items
 def getmeanSleepDayAndNight(dataItemsDict):
     epoch = dt.datetime.utcfromtimestamp(0)
     for key in dataItemsDict:
@@ -468,6 +385,7 @@ def getmeanSleepDayAndNight(dataItemsDict):
         item.meanSleepDaySecsSinceDaybreak = item.meanSleepTimeDay-(item.starts-epoch).total_seconds()
     return dataItemsDict
 
+# Sets values for longest sleep period for each day and night, adds them to data items
 def setLongestSleepDayAndNight(dataItemsDict):
     for key in dataItemsDict:
         item = dataItemsDict[key]
@@ -483,9 +401,11 @@ def setLongestSleepDayAndNight(dataItemsDict):
         item.longestDaySleepSecs = longestSleepDayInSecs
     return dataItemsDict
 
+# Converts and integer or float value for a number of seconds to a datetime object with values for HH:MM:SS
 def convertSecondsToHMS(secs):
     return str(dt.timedelta(seconds=secs))
 
+# Sets hours slept during day and night and adds them to data items
 def setHoursSleptDayAndNight(dataItemsDict):
     for key in dataItemsDict:
         item = dataItemsDict[key]
@@ -499,58 +419,19 @@ def setHoursSleptDayAndNight(dataItemsDict):
         item.totalSecsSleptDay = totalSecsSleptDay
     return dataItemsDict
 
-def testPrintSpecificItemKey(dataItemsDict,key):
-    print dataItemsDict[key].starts
-    print dataItemsDict[key].ends
-    print "nightfall = "+str(dataItemsDict[key].nightfall)
-    print "sleptNightSeconds = "+str(dataItemsDict[key].sleptNightSeconds)
-    print "slept night H:M:S = "+str(dt.timedelta(seconds=dataItemsDict[key].sleptNightSeconds))
-    print "sleptDaySeconds = "+str(dataItemsDict[key].sleptDaySeconds)
-    print "slept day H:M:S = "+str(dt.timedelta(seconds=dataItemsDict[key].sleptDaySeconds))
-    print "longestSleepNight = "+convertSecondsToHMS(dataItemsDict[key].longestNightSleepSecs)
-    print "longestSleepDay = "+convertSecondsToHMS(dataItemsDict[key].longestDaySleepSecs)
-    print "meanSleepTimeNight = "+str(dataItemsDict[key].meanSleepTimeNight)
-    print "meanSleepTimeNight = "+str(dt.datetime.fromtimestamp(dataItemsDict[key].meanSleepTimeNight).strftime('%c'))
-    print "meanSleepNightSecsSinceNightfall = "+str(dataItemsDict[key].meanSleepNightSecsSinceNightfall)
-    print "meanSleepTimeDay = "+str(dataItemsDict[key].meanSleepTimeDay)
-    print "meanSleepTimeDay = "+str(dt.datetime.fromtimestamp(dataItemsDict[key].meanSleepTimeDay).strftime('%c'))
-    print "meanSleepDaySecsSinceDaybreak = "+str(dataItemsDict[key].meanSleepDaySecsSinceDaybreak)
-    print "nightActivities"
-    for item in dataItemsDict[key].nightActivities:
-        print item
-    print "dayActivities"
-    for item in dataItemsDict[key].dayActivities:
-        print item
-    print ""
-
-def testPrintDataItems(dataItemsDict):
-    for key in dataItemsDict:
-        print dataItemsDict[key].starts
-        print dataItemsDict[key].ends
-        print "nightfall = "+str(item.nightfall)
-        print "nightActivities"
-        for item in dataItemsDict[key].nightActivities:
-            print item
-        print "dayActivities"
-        for item in dataItemsDict[key].dayActivities:
-            print item
-        print ""
-
+# Calculates seconds slept during night, day and twentyFourHourPeriod
 def calculateAnalysisDataValues(dataItemsDict):
-
     for key in dataItemsDict:
         item = dataItemsDict[key]
         # Calculates total seconds slept during night
         secondsSleptInNight = 0.0
         for activity in item.nightActivities:
-            #print "night activity = "+str(activity)
             if activity.name == "sleeping":
                 secondsSleptInNight += activity.getSeconds()
         item.sleptNightSeconds = secondsSleptInNight
         # Calculates total seconds slept during day
         secondsSleptInDay = 0.0
         for activity in item.dayActivities:
-            #print "day activity = "+str(activity)
             if activity.name == "sleeping":
                 secondsSleptInDay += activity.getSeconds()
         item.sleptDaySeconds = secondsSleptInDay
@@ -558,6 +439,7 @@ def calculateAnalysisDataValues(dataItemsDict):
         item.slept24HoursSeconds = item.sleptNightSeconds + item.sleptDaySeconds
     return dataItemsDict
 
+# Adds activities to data items
 def addActivitiesToDataItems(dataItemsDict,activitiesList):
     activitiesSpillingIntoNextDay = []
     for key in dataItemsDict:
@@ -569,7 +451,6 @@ def addActivitiesToDataItems(dataItemsDict,activitiesList):
         for activity in activitiesList:
             # Add activity to the item.daytimeActivities list
             if activity.begins >= period.begins and activity.ends <= nightfall:
-                #print "True:activity.begins >= period.begins and activity.ends <= nightfall"
                 item.dayActivities.append(activity)
             # Add the activityto the item.nighttimeActivities list
             elif activity.begins >= nightfall and activity.ends <= item.ends:
@@ -593,6 +474,7 @@ def addActivitiesToDataItems(dataItemsDict,activitiesList):
                 nextDateDateItem.dayActivities.append(nextDayActivityPortion)
     return dataItemsDict
 
+# Data item object to store information on activities carried out within a given twentyFourHourPeriod
 class dataItem(object):
     def __init__(self,name,twentyFourHourPeriod):
         self.name = name
@@ -630,6 +512,7 @@ class dataItem(object):
     def __str__(self):
         return "name:"+str(self.name)+"; startDate:"+str(self.startDate)+"; nightActivities:"+str(self.nightActivities)+"; dayActivities:"+str(self.dayActivities)+"; subperiods"+str(self.subperiods)+"; day:"+str(self.day)+"; night:"+str(self.night)+"; slept24HoursSeconds:"+str(self.slept24HoursSeconds)+"; sleptNightSeconds:"+str(self.sleptNightSeconds)+"; sleptDaySeconds:"+str(self.sleptDaySeconds)+"; avgNightSleepSeconds:"+str(self.avgNightSleepSeconds)+"; avgDaySleepSeconds:"+str(self.avgDaySleepSeconds)+"; goodNightsSleepScore:"+str(self.goodNightsSleepScore)
 
+# Object to store information of a time period of arbitrary length
 class timePeriod(object):
     def __init__(self,name,begins,ends):
         self.name = name
@@ -643,6 +526,7 @@ class timePeriod(object):
     def __str__(self):
         return "timePeriod name:"+str(self.name)+"; startDate:"+str(self.startDate)+" starts:"+str(self.begins)+"; ends:"+str(self.ends)+"; seconds;"+str(self.seconds)
 
+# Object to store information on an instance of an arbitrary activity
 class activityInstance(object):
     def __init__(self,item):
         startDate = item[0]
@@ -698,6 +582,7 @@ def getMaxAndMinDates(analysisDataList):
     #print "latestDate = "+str(latestDate)
     return latestDate, earliestDate
 
+# Main function to call functions to read in activity data, process it into data items dealing with activities carried out over distinct twentyFourHourPeriods and visualise the data through graphs and regression analysis.
 def go():
     dataFiles = ['sleepingData.csv']#,'feedingData.csv']
     activityTypes = ['sleeping','feeding']

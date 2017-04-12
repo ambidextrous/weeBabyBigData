@@ -96,3 +96,7 @@ ENV/
 # Swap files
 **.swp
 **.csv#
+
+# R files
+.RData
+.Rhistory
