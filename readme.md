@@ -1,8 +1,14 @@
-# Rougly hacked together Python scripts to visualise sleep patterns and analyse the relationship between daytime sleep patterns and those of the subsequent night
+# Wee Baby, Big Data
+
+## Statistical analysis versus child-based insomnia: a parental survival aid
+
+Rougly hacked together Python scripts to visualise sleep patterns and analyse the relationship between daytime sleep patterns and those of the subsequent night
 
 `graphActivities.py` produces a graphical representation a of data-set of time spent carrying out daily activities, using the matplotlib library. 
 
 `analyseData.py` processes the activity data into `dataItem` objects containing daily sleep time and duration information. Then produces graphical represtentions of said data items and carries out a regression analysis to determine daily sleep patterns corresponding with increased or decreased sleep over the following night.
+
+If you find this useful or have any suggestions for additions or improvements, let me know at butleraidan at gmail dot com.
 
 ## Use Instructions
 
@@ -29,21 +35,21 @@ Visualisation shows hours of the day on the y-axis and calendar days on the x-ax
 
 Activities over time visualisation:
 
-![Output example](https://github.com/ambidextrous/timeLogGrapher/blob/master/activityData.jpg "Ouput Example")
+![Output example](https://github.com/ambidextrous/weeBabyBigData/blob/master/activityData.jpg "Ouput Example")
 
 ## Analysis
 
 Hours slept night and day graph:
 
-![Hours slept night and day](https://github.com/ambidextrous/timeLogGrapher/blob/master/hoursSleptNightAndDayBarchart.jpg "Hours slept night and day")
+![Hours slept night and day](https://github.com/ambidextrous/weeBabyBigData/blob/master/hoursSleptNightAndDayBarchart.jpg "Hours slept night and day")
 
 Mean day sleep time graph:
 
-![Mean day sleep time](https://github.com/ambidextrous/timeLogGrapher/blob/master/meanDaySleeptimeLineGraph.jpg "Mean day sleep time")
+![Mean day sleep time](https://github.com/ambidextrous/weeBabyBigData/blob/master/meanDaySleeptimeLineGraph.jpg "Mean day sleep time")
 
 Longest continuous sleep night and day graph:
 
-![Longest continuous sleep night and day](https://github.com/ambidextrous/timeLogGrapher/blob/master/longestContinuousSleepNightAndDayBarchart.jpg "Longest continuous sleep night and day")
+![Longest continuous sleep night and day](https://github.com/ambidextrous/weeBabyBigData/blob/master/longestContinuousSleepNightAndDayBarchart.jpg "Longest continuous sleep night and day")
 
 ## Multi-variable linear regression analysis
 
