@@ -71,7 +71,7 @@ Longest continuous sleep night and day graph:
     Model:                            OLS   Adj. R-squared:                  0.208
     Method:                 Least Squares   F-statistic:                     2.964
     Date:                Thu, 13 Apr 2017   Prob (F-statistic):             0.0384
-    Time:                        16:02:16   Log-Likelihood:                -32.299
+    Time:                        16:19:46   Log-Likelihood:                -32.299
     No. Observations:                  31   AIC:                             74.60
     Df Residuals:                      26   BIC:                             81.77
     Df Model:                           4                                         
