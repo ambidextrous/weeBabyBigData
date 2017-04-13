@@ -16,6 +16,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 # Analyses activity and time-use data and produces visualisations thereof
 def analyseData(activitiesList,maxDate,minDate):
     
+    birthDate = dt.datetime(2017,2,6)
     dayLengthHours = 24
     nightStartTimeHours = 22
     nightDurationHours = 8
@@ -79,6 +80,8 @@ def analyseData(activitiesList,maxDate,minDate):
 
     dataItemsDict = getmeanSleepDayAndNight(dataItemsDict)
 
+    dataItemsDict = setAgeInDays(dataItemsDict,birthDate)
+
     dataItemsDateOrderedList = removeMissingSleepDataItems(dataItemsDateOrderedList)
 
     dataItemsDateOrderedList = calculateValuesForAndPlotDayNightHoursSleptBarChart(dataItemsDateOrderedList)
@@ -89,12 +92,68 @@ def analyseData(activitiesList,maxDate,minDate):
 
     writeSleepAnalysisDataToFile(dataItemsDateOrderedList)
 
+    generateScatterPlots(dataItemsDateOrderedList)
+
     regress(dataItemsDateOrderedList)
+
+# Calls function to generate scatter plots for regression dependent variable and independent variables
+def generateScatterPlots(dataItemsList):
+    hoursSleptNightList = []
+    hoursSleptDayList = []
+    longestSleepHoursDayList = []
+    meanSleepTimeDayList = []
+    ageInDaysList = []
+    for item in dataItemsList:
+        hoursSleptNightList.append(item.hoursSleptDuringNight)
+        hoursSleptDayList.append(item.hoursSleptDuringDay)
+        longestSleepHoursDayList.append(item.longestDaySleepHours)
+        meanSleepTimeDayList.append(item.meanSleepTimeDayHoursSinceMidnight)
+        ageInDaysList.append(item.ageInDays)
+    hoursSleptNightLable = 'Hours slept per night'
+    hoursSleptDayLable = 'Hours slept per day'
+    longestSleepHoursDayLable = 'Longest continuous sleep period during day'
+    meanSleepTimeDayLable = 'Mean sleep time during day\n (lower = closer sleep more earlier in day; higher = slept more later in day)'
+    ageInDaysLable = 'Age in days'
+    dependentVariableList = hoursSleptNightList
+    dependentVariableLable = hoursSleptNightLable
+    generateScatterPlot(dependentVariableList,hoursSleptDayList,dependentVariableLable,hoursSleptDayLable)
+    generateScatterPlot(dependentVariableList,longestSleepHoursDayList,dependentVariableLable,longestSleepHoursDayLable)
+    generateScatterPlot(dependentVariableList,meanSleepTimeDayList,dependentVariableLable,meanSleepTimeDayLable)
+    generateScatterPlot(dependentVariableList,ageInDaysList,dependentVariableLable,ageInDaysLable)
+
+# Generates scatter plot for regression depdnent variable and independent variable
+def generateScatterPlot(dependentVariableList,independentVariableList,dependentLable,independentLable):
+    #plt.scatter(dependentVariableList,independentVariableList)
+
+    fig, ax = plt.subplots(figsize=(12,10))
+
+    plt.scatter(independentVariableList,dependentVariableList)
+
+    plt.ylabel("Dependent variable: "+dependentLable,fontweight='bold')
+    plt.xlabel("Independent variable: "+independentLable,fontweight='bold')
+
+    # Removing spaces from lables
+    dependentLable = "".join(dependentLable.split())
+    independentLable = "".join(independentLable.split())
+
+    # Saves to file 
+    plt.savefig(dependentLable+independentLable+'Scatterplot.pdf')
+    plt.savefig(dependentLable+independentLable+'Scatterplot.jpg')
+
+    plt.show()
+
+# Sets ageInDays variable for each dataItem
+def setAgeInDays(dataItemsDict,birthDate):
+    secondDayConversion = 60 * 60 * 24
+    for key in dataItemsDict:
+        item = dataItemsDict[key]
+        item.ageInDays = round(((item.starts - birthDate).total_seconds() / secondDayConversion),0)
+    return dataItemsDict
 
 # Carries out regression analysis of data, prints to command line and writes to file
 def regress(dataItems):
     df = pandas.read_csv('sleepAnalysisData.csv')
-    model = ols('hoursSleptNight ~ hoursSleptDay + longestSleepHoursDay + meanSleepTimeDay', df).fit()
+    model = ols('hoursSleptNight ~ hoursSleptDay + longestSleepHoursDay + meanSleepTimeDay + ageInDays', df).fit()
     print model.summary()
     textFile = open("regressionAnalysisOutput.txt","w")
     textFile.write(str(model.summary()))
@@ -105,10 +164,10 @@ def writeSleepAnalysisDataToFile(dataItemsList):
     with open('sleepAnalysisData.csv','wb') as csvfile:
         w = csv.writer(csvfile)
         # Write name rows header
-        w.writerow(['date','hoursSleptNight','hoursSleptDay','longestSleepHoursDay','longestSleepHourNight','meanSleepTimeDay'])
+        w.writerow(['date','hoursSleptNight','hoursSleptDay','longestSleepHoursDay','longestSleepHourNight','meanSleepTimeDay','ageInDays'])
         # Write data rows
         for item in dataItemsList:
-            w.writerow([str(item.startDate),str(item.hoursSleptDuringNight),str(item.hoursSleptDuringDay),str(item.longestDaySleepHours),str(item.longestNightSleepHours),str(item.meanSleepTimeDayHoursSinceMidnight)])
+            w.writerow([str(item.startDate),str(item.hoursSleptDuringNight),str(item.hoursSleptDuringDay),str(item.longestDaySleepHours),str(item.longestNightSleepHours),str(item.meanSleepTimeDayHoursSinceMidnight),str(item.ageInDays)])
 
 # Removes dataItems with less than a minimum number of hours sleep for either the day or night periods from dataItemsList
 def removeMissingSleepDataItems(dataItemsList):
@@ -508,6 +567,7 @@ class dataItem(object):
         self.longestDaySleepHours = 0
         self.longestNightSleepHours = 0
         self.meanSleepTimeDayHoursSinceMidnight = 0
+        self.ageInDays = 0
         #print (self)
     def __str__(self):
         return "name:"+str(self.name)+"; startDate:"+str(self.startDate)+"; nightActivities:"+str(self.nightActivities)+"; dayActivities:"+str(self.dayActivities)+"; subperiods"+str(self.subperiods)+"; day:"+str(self.day)+"; night:"+str(self.night)+"; slept24HoursSeconds:"+str(self.slept24HoursSeconds)+"; sleptNightSeconds:"+str(self.sleptNightSeconds)+"; sleptDaySeconds:"+str(self.sleptDaySeconds)+"; avgNightSleepSeconds:"+str(self.avgNightSleepSeconds)+"; avgDaySleepSeconds:"+str(self.avgDaySleepSeconds)+"; goodNightsSleepScore:"+str(self.goodNightsSleepScore)

@@ -53,6 +53,26 @@ Longest continuous sleep night and day graph:
 
 ## Multi-variable linear regression analysis
 
+# Scatter plots
+
+![Hours slept per night vs. hours slept per day scatter plot](https://github.com/ambidextrous/weeBabyBigData/blob/master/HourssleptpernightHourssleptperdayScatterplot.jpg "Hours slept per night vs. hours slept per day scatterplot")
+
+
+![Hours slept per night vs. longest period of continuous sleep during day scatter plot](https://github.com/ambidextrous/weeBabyBigData/blob/master/HourssleptpernightLongestcontinuoussleepperiodduringdayScatterplot.jpg "Hours slept per night vs. longest period of continuous sleep during day scatterplot")
+
+
+![Hours slept per night vs. hours slept per day scatter plot](https://github.com/ambidextrous/weeBabyBigData/blob/master/HourssleptpernightHourssleptperdayScatterplot.jpg "Hours slept per night vs. hours slept per day scatterplot")
+
+![Hours slept per night vs. age in days scatter plot](https://github.com/ambidextrous/weeBabyBigData/blob/master/HourssleptpernightAgeindaysScatterplot.jpg "Hours slept per night vs. age in days scatterplot")
+
+	----------------------------------------------------------------------------------------
+	Intercept                9.7911      1.708      5.732      0.000         6.280    13.302
+	hoursSleptDay            0.1582      0.145      1.088      0.287        -0.141     0.457
+	longestSleepHoursDay    -0.7681      0.314     -2.443      0.022        -1.414    -0.122
+	meanSleepTimeDay        -0.2576      0.120     -2.149      0.041        -0.504    -0.011
+	==============================================================================
+
+
 Sample ordianry least squares regression analysis output:
 
 		                            OLS Regression Results                            
@@ -114,7 +134,7 @@ R output:
 	Multiple R-squared:  0.2763,	Adjusted R-squared:  0.1928 
 	F-statistic: 3.309 on 3 and 26 DF,  p-value: 0.03571
 
-#Disclaimer
+# Disclaimer
 
 This software is used subject to the following conditions:
 
