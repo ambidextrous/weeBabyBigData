@@ -51,9 +51,9 @@ Longest continuous sleep night and day graph:
 
 ![Longest continuous sleep night and day](https://github.com/ambidextrous/weeBabyBigData/blob/master/longestContinuousSleepNightAndDayBarchart.jpg "Longest continuous sleep night and day")
 
-## Multi-variable linear regression analysis
+# Multi-variable linear regression analysis
 
-# Scatter plots
+## Scatter plots
 
 ![Hours slept per night vs. hours slept per day scatter plot](https://github.com/ambidextrous/weeBabyBigData/blob/master/HourssleptpernightHourssleptperdayScatterplot.jpg "Hours slept per night vs. hours slept per day scatterplot")
 
@@ -65,74 +65,34 @@ Longest continuous sleep night and day graph:
 
 ![Hours slept per night vs. age in days scatter plot](https://github.com/ambidextrous/weeBabyBigData/blob/master/HourssleptpernightAgeindaysScatterplot.jpg "Hours slept per night vs. age in days scatterplot")
 
-	----------------------------------------------------------------------------------------
-	Intercept                9.7911      1.708      5.732      0.000         6.280    13.302
-	hoursSleptDay            0.1582      0.145      1.088      0.287        -0.141     0.457
-	longestSleepHoursDay    -0.7681      0.314     -2.443      0.022        -1.414    -0.122
-	meanSleepTimeDay        -0.2576      0.120     -2.149      0.041        -0.504    -0.011
-	==============================================================================
-
-
-Sample ordianry least squares regression analysis output:
-
-		                            OLS Regression Results                            
-	==============================================================================
-	Dep. Variable:        hoursSleptNight   R-squared:                       0.276
-	Model:                            OLS   Adj. R-squared:                  0.193
-	Method:                 Least Squares   F-statistic:                     3.309
-	Date:                Wed, 12 Apr 2017   Prob (F-statistic):             0.0357
-	Time:                        15:56:01   Log-Likelihood:                -30.852
-	No. Observations:                  30   AIC:                             69.70
-	Df Residuals:                      26   BIC:                             75.31
-	Df Model:                           3                                         
-	Covariance Type:            nonrobust                                         
-	========================================================================================
-	                           coef    std err          t      P>|t|      [95.0% Conf. Int.]
-	----------------------------------------------------------------------------------------
-	Intercept                9.7911      1.708      5.732      0.000         6.280    13.302
-	hoursSleptDay            0.1582      0.145      1.088      0.287        -0.141     0.457
-	longestSleepHoursDay    -0.7681      0.314     -2.443      0.022        -1.414    -0.122
-	meanSleepTimeDay        -0.2576      0.120     -2.149      0.041        -0.504    -0.011
-	==============================================================================
-	Omnibus:                        3.877   Durbin-Watson:                   0.597
-	Prob(Omnibus):                  0.144   Jarque-Bera (JB):                1.568
-	Skew:                           0.066   Prob(JB):                        0.457
-	Kurtosis:                       1.888   Cond. No.                         179.
-	==============================================================================
-
-	Warnings:
-	[1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
-
-Sample R output, for comparisson purposes:
-
-R input:
-
-	> sleepData = read.csv("sleepAnalysisData.csv")
-	> sleepModel = lm(hoursSleptNight ~ hoursSleptDay + longestSleepHoursDay + meanSleepTimeDay, data = sleepData)
-	> summary(sleepModel)
-
-R output:
-
-	Call:
-	lm(formula = hoursSleptNight ~ hoursSleptDay + longestSleepHoursDay + 
-    	meanSleepTimeDay, data = sleepData)
-
-	Residuals:
-	     Min       1Q   Median       3Q      Max 
-	-1.15801 -0.45246  0.01101  0.48262  1.18274 
-
-	Coefficients:
-	                     Estimate Std. Error t value Pr(>|t|)    
-	(Intercept)            9.7911     1.7081   5.732 4.93e-06 ***
-	hoursSleptDay          0.1582     0.1454   1.088   0.2865    
-	longestSleepHoursDay  -0.7681     0.3144  -2.443   0.0217 *  
-	meanSleepTimeDay      -0.2576     0.1198  -2.149   0.0411 *  
-	---
-	Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-	Residual standard error: 0.7269 on 26 degrees of freedom
-	Multiple R-squared:  0.2763,	Adjusted R-squared:  0.1928 
-	F-statistic: 3.309 on 3 and 26 DF,  p-value: 0.03571
+                            OLS Regression Results                            
+    ==============================================================================
+    Dep. Variable:        hoursSleptNight   R-squared:                       0.313
+    Model:                            OLS   Adj. R-squared:                  0.208
+    Method:                 Least Squares   F-statistic:                     2.964
+    Date:                Thu, 13 Apr 2017   Prob (F-statistic):             0.0384
+    Time:                        16:02:16   Log-Likelihood:                -32.299
+    No. Observations:                  31   AIC:                             74.60
+    Df Residuals:                      26   BIC:                             81.77
+    Df Model:                           4                                         
+    Covariance Type:            nonrobust                                         
+    ========================================================================================
+                               coef    std err          t      P>|t|      [95.0% Conf. Int.]
+    ----------------------------------------------------------------------------------------
+    Intercept               10.3061      2.282      4.516      0.000         5.615    14.997
+    hoursSleptDay            0.1866      0.148      1.261      0.219        -0.118     0.491
+    longestSleepHoursDay    -0.8716      0.346     -2.521      0.018        -1.582    -0.161
+    meanSleepTimeDay        -0.2837      0.126     -2.248      0.033        -0.543    -0.024
+    ageInDays               -0.0023      0.017     -0.141      0.889        -0.036     0.032
+    ==============================================================================
+    Omnibus:                        5.932   Durbin-Watson:                   0.562
+    Prob(Omnibus):                  0.051   Jarque-Bera (JB):                1.934
+    Skew:                           0.088   Prob(JB):                        0.380
+    Kurtosis:                       1.789   Cond. No.                         887.
+    ==============================================================================
+    
+    Warnings:
+    [1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
 
 # Disclaimer
 
@@ -141,4 +101,3 @@ This software is used subject to the following conditions:
 THIS SOFTWARE (INCLUDING, WITHOUT LIMITATION, ADVICE OR RECOMMENDATIONS) IS INTENDED SOLELY AS A GENERAL EDUCATIONAL AID AND ARE NEITHER MEDICAL NOR HEALTHCARE ADVICE FOR ANY INDIVIDUAL PROBLEM NOR A SUBSTITUTE FOR MEDICAL OR OTHER PROFESSIONAL ADVICE AND SERVICES FROM A QUALIFIED HEALTHCARE PROVIDER FAMILIAR WITH YOUR UNIQUE FACTS. ALWAYS SEEK THE ADVICE OF YOUR PHYSICIAN OR OTHER QUALIFIED HEALTHCARE PROVIDER REGARDING ANY MEDICAL CONDITION AND BEFORE STARTING ANY NEW TREATMENT. NOTHING CONTAINED IN THE SOFTWARE IS INTENDED TO BE USED FOR MEDICAL DIAGNOSIS OR TREATMENT. THE SOFTWARE IS PROVIDED WITH THE UNDERSTANDING THAT NEITHER THE AUTHORS OF THE SOFTWARE NOR ANY OF ITS CONTRIBUTORS OR USERS ARE ENGAGED IN RENDERING LEGAL, MEDICAL, COUNSELING, OR OTHER PROFESSIONAL SERVICES OR ADVICE. YOUR USE OF THE SOFTWARE IS SUBJECT TO THE ADDITIONAL DISCLAIMERS AND CAVEATS THAT MAY APPEAR THROUGHOUT THE SOFTWARE. THE AUTHORS ASSUME NO RESPONSIBILITY FOR ANY CONSEQUENCE RELATING DIRECTLY OR INDIRECTLY TO ANY ACTION OR INACTION YOU TAKE BASED ON THE SOFTWARE. 
 
 IN NO EVENT WILL THE AUTHORS OR THEIR AFFILIATES BE LIABLE FOR ANY DIRECT, SPECIAL, INDIRECT, INCIDENTAL, CONSEQUENTIAL (INCLUDING AMONG OTHER THINGS LOSS OF REVENUE OR PROFITS), PUNITIVE, OR EXEMPLARY, DAMAGES OF ANY KIND OR SUBJECT TO EQUITABLE OR INJUNCTIVE REMEDIES (WHETHER BASED ON BREACH OF CONTRACT, TORT, NEGLIGENCE, STRICT LIABILITY OR OTHERWISE) ARISING OUT OF USE OF THIS SOFTWARE, OR DELAY OR INABILITY TO USE THE SOFTWARE, OR ANY INFORMATION CONTAINED IN THE SOFTWARE. NOTHING IN THIS LIMITATION OF LIABILITY SHALL EXCLUDE LIABILITIES NOT PERMITTED TO BE EXCLUDED BY APPLICABLE LAW.
-
