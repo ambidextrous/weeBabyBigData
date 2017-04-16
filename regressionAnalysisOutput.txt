@@ -1,27 +1,27 @@
                             OLS Regression Results                            
 ==============================================================================
-Dep. Variable:        hoursSleptNight   R-squared:                       0.280
-Model:                            OLS   Adj. R-squared:                  0.177
-Method:                 Least Squares   F-statistic:                     2.716
-Date:                Sat, 15 Apr 2017   Prob (F-statistic):             0.0499
-Time:                        08:08:14   Log-Likelihood:                -35.515
-No. Observations:                  33   AIC:                             81.03
-Df Residuals:                      28   BIC:                             88.51
+Dep. Variable:        hoursSleptNight   R-squared:                       0.237
+Model:                            OLS   Adj. R-squared:                  0.132
+Method:                 Least Squares   F-statistic:                     2.258
+Date:                Sun, 16 Apr 2017   Prob (F-statistic):             0.0872
+Time:                        19:39:03   Log-Likelihood:                -37.369
+No. Observations:                  34   AIC:                             84.74
+Df Residuals:                      29   BIC:                             92.37
 Df Model:                           4                                         
 Covariance Type:            nonrobust                                         
 ========================================================================================
                            coef    std err          t      P>|t|      [95.0% Conf. Int.]
 ----------------------------------------------------------------------------------------
-Intercept                8.9102      2.208      4.035      0.000         4.386    13.434
-hoursSleptDay            0.1855      0.152      1.219      0.233        -0.126     0.497
-longestSleepHoursDay    -0.7052      0.329     -2.140      0.041        -1.380    -0.030
-meanSleepTimeDay        -0.2487      0.128     -1.937      0.063        -0.512     0.014
-ageInDays                0.0125      0.015      0.864      0.395        -0.017     0.042
+Intercept                7.9943      2.164      3.695      0.001         3.569    12.420
+hoursSleptDay            0.1108      0.147      0.756      0.456        -0.189     0.410
+longestSleepHoursDay    -0.5029      0.306     -1.643      0.111        -1.129     0.123
+meanSleepTimeDay        -0.2018      0.127     -1.589      0.123        -0.461     0.058
+ageInDays                0.0198      0.014      1.417      0.167        -0.009     0.048
 ==============================================================================
-Omnibus:                        6.572   Durbin-Watson:                   0.562
-Prob(Omnibus):                  0.037   Jarque-Bera (JB):                2.101
-Skew:                          -0.126   Prob(JB):                        0.350
-Kurtosis:                       1.790   Cond. No.                         878.
+Omnibus:                        4.432   Durbin-Watson:                   0.582
+Prob(Omnibus):                  0.109   Jarque-Bera (JB):                1.918
+Skew:                          -0.220   Prob(JB):                        0.383
+Kurtosis:                       1.923   Cond. No.                         864.
 ==============================================================================
 
 Warnings:
