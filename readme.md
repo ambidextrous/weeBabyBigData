@@ -81,28 +81,28 @@ Longest continuous sleep night and day graph:
 
                             OLS Regression Results                            
     ==============================================================================
-    Dep. Variable:        hoursSleptNight   R-squared:                       0.240
-    Model:                            OLS   Adj. R-squared:                  0.139
-    Method:                 Least Squares   F-statistic:                     2.367
-    Date:                Mon, 17 Apr 2017   Prob (F-statistic):             0.0751
-    Time:                        21:24:24   Log-Likelihood:                -38.483
-    No. Observations:                  35   AIC:                             86.97
-    Df Residuals:                      30   BIC:                             94.74
+    Dep. Variable:        hoursSleptNight   R-squared:                       0.222
+    Model:                            OLS   Adj. R-squared:                  0.121
+    Method:                 Least Squares   F-statistic:                     2.210
+    Date:                Wed, 19 Apr 2017   Prob (F-statistic):             0.0909
+    Time:                        00:21:06   Log-Likelihood:                -39.598
+    No. Observations:                  36   AIC:                             89.20
+    Df Residuals:                      31   BIC:                             97.11
     Df Model:                           4                                         
     Covariance Type:            nonrobust                                         
     ========================================================================================
                                coef    std err          t      P>|t|      [95.0% Conf. Int.]
     ----------------------------------------------------------------------------------------
-    Intercept                7.2385      2.004      3.612      0.001         3.146    11.331
-    hoursSleptDay            0.1283      0.145      0.885      0.383        -0.168     0.425
-    longestSleepHoursDay    -0.5137      0.305     -1.683      0.103        -1.137     0.110
-    meanSleepTimeDay        -0.1619      0.119     -1.356      0.185        -0.406     0.082
-    ageInDays                0.0237      0.013      1.780      0.085        -0.003     0.051
+    Intercept                7.4210      1.991      3.728      0.001         3.361    11.481
+    hoursSleptDay            0.1330      0.145      0.919      0.365        -0.162     0.428
+    longestSleepHoursDay    -0.5339      0.304     -1.757      0.089        -1.154     0.086
+    meanSleepTimeDay        -0.1633      0.119     -1.371      0.180        -0.406     0.080
+    ageInDays                0.0203      0.013      1.588      0.122        -0.006     0.046
     ==============================================================================
-    Omnibus:                        4.805   Durbin-Watson:                   0.562
-    Prob(Omnibus):                  0.090   Jarque-Bera (JB):                2.161
-    Skew:                          -0.288   Prob(JB):                        0.339
-    Kurtosis:                       1.927   Cond. No.                         822.
+    Omnibus:                        5.820   Durbin-Watson:                   0.646
+    Prob(Omnibus):                  0.054   Jarque-Bera (JB):                2.244
+    Skew:                          -0.238   Prob(JB):                        0.326
+    Kurtosis:                       1.873   Cond. No.                         838.
     ==============================================================================
     
     Warnings:
