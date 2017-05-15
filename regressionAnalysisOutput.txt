@@ -1,30 +1,30 @@
                             OLS Regression Results                            
 ==============================================================================
-Dep. Variable:        hoursSleptNight   R-squared:                       0.251
-Model:                            OLS   Adj. R-squared:                  0.198
-Method:                 Least Squares   F-statistic:                     4.703
-Date:                Sat, 13 May 2017   Prob (F-statistic):            0.00242
-Time:                        22:00:44   Log-Likelihood:                -63.985
-No. Observations:                  61   AIC:                             138.0
-Df Residuals:                      56   BIC:                             148.5
+Dep. Variable:        hoursSleptNight   R-squared:                       0.271
+Model:                            OLS   Adj. R-squared:                  0.220
+Method:                 Least Squares   F-statistic:                     5.381
+Date:                Mon, 15 May 2017   Prob (F-statistic):           0.000938
+Time:                        21:33:22   Log-Likelihood:                -65.317
+No. Observations:                  63   AIC:                             140.6
+Df Residuals:                      58   BIC:                             151.4
 Df Model:                           4                                         
 Covariance Type:            nonrobust                                         
 ========================================================================================
                            coef    std err          t      P>|t|      [95.0% Conf. Int.]
 ----------------------------------------------------------------------------------------
-Intercept                7.7555      1.586      4.889      0.000         4.578    10.933
-hoursSleptDay            0.0182      0.107      0.170      0.866        -0.196     0.233
-longestSleepHoursDay    -0.3562      0.221     -1.609      0.113        -0.800     0.087
-meanSleepTimeDay        -0.1547      0.098     -1.582      0.119        -0.351     0.041
-ageInDays                0.0157      0.006      2.801      0.007         0.004     0.027
+Intercept                7.7037      1.559      4.943      0.000         4.584    10.824
+hoursSleptDay            0.0242      0.105      0.230      0.819        -0.186     0.235
+longestSleepHoursDay    -0.3672      0.218     -1.686      0.097        -0.803     0.069
+meanSleepTimeDay        -0.1535      0.096     -1.593      0.117        -0.346     0.039
+ageInDays                0.0162      0.005      3.059      0.003         0.006     0.027
 ==============================================================================
-Omnibus:                        2.871   Durbin-Watson:                   1.132
-Prob(Omnibus):                  0.238   Jarque-Bera (JB):                2.650
-Skew:                          -0.504   Prob(JB):                        0.266
-Kurtosis:                       2.838   Cond. No.                     1.18e+03
+Omnibus:                        3.120   Durbin-Watson:                   1.144
+Prob(Omnibus):                  0.210   Jarque-Bera (JB):                2.823
+Skew:                          -0.516   Prob(JB):                        0.244
+Kurtosis:                       2.906   Cond. No.                     1.21e+03
 ==============================================================================
 
 Warnings:
 [1] Standard Errors assume that the covariance matrix of the errors is correctly specified.
-[2] The condition number is large, 1.18e+03. This might indicate that there are
+[2] The condition number is large, 1.21e+03. This might indicate that there are
 strong multicollinearity or other numerical problems.
